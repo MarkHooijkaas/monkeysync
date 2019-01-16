@@ -1,16 +1,14 @@
 package org.kisst.monkeysync.map;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.kisst.monkeysync.*;
-import org.kisst.monkeysync.json.JsonBuilder;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -19,10 +17,6 @@ import java.util.Map;
 public class MapSource implements RecordSource, RecordDestination {
     private final LinkedHashMap<String, MapRecord> records = new LinkedHashMap<>();
     private final HashSet<String> handled = new HashSet<>();
-
-    public MapSource(File file, ) {
-        readJsonFile(file);
-    }
 
     @Override public boolean recordExists(String key) { return records.containsKey(key);}
     @Override public MapRecord getRecord(String key) { return records.get(key);}
@@ -72,13 +66,21 @@ public class MapSource implements RecordSource, RecordDestination {
 
     public void writeJsonFile(String filename) {
         try (FileWriter file = new FileWriter(filename)) {
-            file.write("[\n");
-            for (MapRecord rec: records.values())
-                file.write(JSONObject.toJSONString(rec)+"\n");
-            file.write("]\n");
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(this, file);
         }
         catch (IOException e) { throw new RuntimeException(e);}
 
+    }
+
+    public static MapSource createFromFile(String path) {
+        try (FileReader reader = new FileReader(path)) {
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            Gson gson = new Gson();
+            return gson.fromJson(bufferedReader, MapSource.class);
+        }
+        catch (FileNotFoundException e) {throw new RuntimeException(e);}
+        catch (IOException e) {throw new RuntimeException(e);}
     }
 
 }

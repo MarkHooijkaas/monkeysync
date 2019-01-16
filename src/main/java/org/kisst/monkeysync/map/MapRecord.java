@@ -9,31 +9,34 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MapRecord extends LinkedHashMap<String,String> implements DestRecord, SourceRecord {
+public class MapRecord implements DestRecord, SourceRecord {
+    private final LinkedHashMap<String,String> fields;
     private final String key;
 
     public MapRecord(String key, Map<String,String> m) {
-        super(m);
+        fields=new LinkedHashMap<>(m);
         this.key = key;
     }
 
     public MapRecord(String key) {
+        this.fields=new LinkedHashMap<>();
         this.key = key;
     }
 
     public MapRecord(String key, Record rec) {
+        this.fields=new LinkedHashMap<>();
         this.key=key;
         for (String fld: rec.fieldNames())
-            put(fld, rec.getField(fld));
+            fields.put(fld, rec.getField(fld));
     }
 
     @Override public String getKey() { return key;}
     @Override public boolean blocked() { return false;}
     @Override public boolean deleted() { return false;}
-    @Override public Iterable<String> fieldNames() { return keySet();}
-    @Override public String getField(String name) { return get(name);}
+    @Override public Iterable<String> fieldNames() { return fields.keySet();}
+    @Override public String getField(String name) { return fields.get(name);}
     public void merge(Map<String, String> diffs) {
         for (String key: diffs.keySet())
-            put(key, diffs.get(key));
+            fields.put(key, diffs.get(key));
     }
 }

@@ -36,8 +36,11 @@ public class Syncer {
                 if (! value.equals(dest.getField(fieldName))) // TODO: what if empty string
                     diffs.put(fieldName, value);
             }
+            System.out.println(diffs.size()+" for "+dest.getKey());
             if (diffs.size()>0)
                 destdb.update(dest, diffs);
+            else
+                System.out.println("identical for "+dest.getKey());
         }
         for (SourceRecord src: srcdb.unhandledRecords())
             destdb.create(src);
