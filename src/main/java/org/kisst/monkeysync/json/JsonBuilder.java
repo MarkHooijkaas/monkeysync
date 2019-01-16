@@ -1,4 +1,6 @@
-package org.kisst.monkeysync;
+package org.kisst.monkeysync.json;
+
+import org.kisst.monkeysync.Record;
 
 import java.util.Map;
 

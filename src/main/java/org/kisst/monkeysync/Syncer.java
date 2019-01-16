@@ -13,20 +13,19 @@ public class Syncer {
      *
      * @param srcdb the source of records
      * @param destdb the destination in which they are merged
-     * @param handler handle what to do when changes are found
      */
-    public static void sync(RecordSource srcdb, RecordDestination destdb, ActionHandler handler) {
+    public static void sync(RecordSource srcdb, RecordDestination destdb) {
         LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
-        for (Record dest : destdb.records()) {
-            if (! dest.isActive()) {
+        for (DestRecord dest : destdb.records()) {
+            if (dest.blocked()) {
                 srcdb.markAsHandled(dest.getKey());
                 continue;
             }
             if (! srcdb.recordExists(dest.getKey()))
                 continue;
-            Record src = srcdb.getRecord(dest.getKey());
-            if (! src.isActive()) {
-                handler.delete(dest);
+            SourceRecord src = srcdb.getRecord(dest.getKey());
+            if (! src.deleted()) {
+                destdb.delete(dest);
                 continue;
             }
             diffs.clear();
@@ -38,10 +37,9 @@ public class Syncer {
                     diffs.put(fieldName, value);
             }
             if (diffs.size()>0)
-                handler.update(dest, diffs);
+                destdb.update(dest, diffs);
         }
-        for (Record src: srcdb.unhandledRecords()) {
-            handler.create(src);
-        }
+        for (SourceRecord src: srcdb.unhandledRecords())
+            destdb.create(src);
     }
 }
