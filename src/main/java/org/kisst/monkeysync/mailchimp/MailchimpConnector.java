@@ -1,7 +1,7 @@
 package org.kisst.monkeysync.mailchimp;
 
 import okhttp3.*;
-import org.kisst.monkeysync.JsonBuilder;
+import org.kisst.monkeysync.json.JsonBuilder;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;

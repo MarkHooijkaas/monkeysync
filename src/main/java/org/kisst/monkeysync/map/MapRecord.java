@@ -6,12 +6,13 @@ import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.SourceRecord;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MapRecord extends HashMap<String,String> implements DestRecord, SourceRecord {
+public class MapRecord extends LinkedHashMap<String,String> implements DestRecord, SourceRecord {
     private final String key;
 
-    public MapRecord(String key, Map m) {
+    public MapRecord(String key, Map<String,String> m) {
         super(m);
         this.key = key;
     }

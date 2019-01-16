@@ -15,6 +15,7 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.12.1'
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile "com.microsoft.sqlserver:sqljdbc4:4.0"
+    testCompile "com.microsoft.sqlserver:mssql-jdbc:7.0.0.jre8"
+//    testCompile group: 'com.microsoft.sqlserver', name: 'sqljdbc4', version: '4.0'
 }
 

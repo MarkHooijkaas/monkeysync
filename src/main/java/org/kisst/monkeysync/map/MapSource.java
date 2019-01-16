@@ -5,8 +5,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.kisst.monkeysync.*;
+import org.kisst.monkeysync.json.JsonBuilder;
 
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,6 +19,10 @@ import java.util.Map;
 public class MapSource implements RecordSource, RecordDestination {
     private final LinkedHashMap<String, MapRecord> records = new LinkedHashMap<>();
     private final HashSet<String> handled = new HashSet<>();
+
+    public MapSource(File file, ) {
+        readJsonFile(file);
+    }
 
     @Override public boolean recordExists(String key) { return records.containsKey(key);}
     @Override public MapRecord getRecord(String key) { return records.get(key);}
@@ -50,10 +57,10 @@ public class MapSource implements RecordSource, RecordDestination {
     }
     @Override public void delete(DestRecord destrec) { records.remove(destrec.getKey());}
 
-    public void readJsonFile(String filename, String keyfield) {
+    public void readJsonFile(File f, String keyfield) {
         JSONParser parser = new JSONParser();
         try {
-            JSONArray arr = (JSONArray) parser.parse(new FileReader(filename));
+            JSONArray arr = (JSONArray) parser.parse(new FileReader(f));
             for (Object it: arr) {
                 JSONObject obj= (JSONObject) it;
                 create(new MapRecord((String) obj.get(keyfield), obj));
@@ -61,6 +68,17 @@ public class MapSource implements RecordSource, RecordDestination {
         }
         catch (IOException e) { throw new RuntimeException(e);}
         catch (ParseException e) { throw new RuntimeException(e);}
+    }
+
+    public void writeJsonFile(String filename) {
+        try (FileWriter file = new FileWriter(filename)) {
+            file.write("[\n");
+            for (MapRecord rec: records.values())
+                file.write(JSONObject.toJSONString(rec)+"\n");
+            file.write("]\n");
+        }
+        catch (IOException e) { throw new RuntimeException(e);}
+
     }
 
 }
