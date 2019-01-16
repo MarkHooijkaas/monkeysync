@@ -6,6 +6,8 @@ import com.google.gson.stream.JsonReader;
 import org.kisst.monkeysync.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -17,8 +19,8 @@ public class MapSource implements RecordSource, RecordDestination {
 
     public MapSource() {}
 
-    public MapSource(File file) {
-        readJsonFile(file);
+    public MapSource(Path path) {
+        readJsonFile(path);
     }
 
     @Override public boolean recordExists(String key) { return records.containsKey(key);}
@@ -54,17 +56,15 @@ public class MapSource implements RecordSource, RecordDestination {
     }
     @Override public void delete(DestRecord destrec) { records.remove(destrec.getKey());}
 
-    public void readJsonFile(File f) {
-        try (FileReader r=new FileReader(f)){
+    public void readJsonFile(Path p) {
+        try {
             Gson gson = new Gson();
-            JsonReader reader = new JsonReader(r);
-            reader.beginArray();
-            while (reader.hasNext()) {
-                LinkedHashMap<String,String> map = gson.fromJson(reader, LinkedHashMap.class);
-                create(new MapRecord(map));
-            }
-            reader.endArray();
-            reader.close();
+            Files.lines(p).forEach(line ->{
+                if (line.trim().length()>0) {
+                    LinkedHashMap<String, String> map = gson.fromJson(line, LinkedHashMap.class);
+                    create(new MapRecord(map));
+                }
+            });
         }
         catch (IOException e) { throw new RuntimeException(e);}
     }
