@@ -1,16 +1,15 @@
 package org.kisst.monkeysync.sql;
 
 import org.kisst.monkeysync.map.MapRecord;
-import org.kisst.monkeysync.map.MapSource;
+import org.kisst.monkeysync.map.MapTable;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
-public class SqlSource extends MapSource {
+public class SqlTable extends MapTable {
 
-    public SqlSource(Properties props, String sql) {
+    public SqlTable(Properties props, String sql) {
         try (Connection conn = connect(props)){
             ResultSet rs = conn.createStatement().executeQuery(sql);
             ResultSetMetaData columns = rs.getMetaData();

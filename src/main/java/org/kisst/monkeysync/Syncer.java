@@ -1,8 +1,10 @@
 package org.kisst.monkeysync;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public class Syncer {
+    private final HashSet<String> handled = new HashSet<>();
     /**
      * This method will sync all records from the source into the destination.
      * To be more precise, it will
@@ -14,17 +16,18 @@ public class Syncer {
      * @param srcdb the source of records
      * @param destdb the destination in which they are merged
      */
-    public static void sync(RecordSource srcdb, RecordDestination destdb) {
+    public void sync(Table srcdb, Table destdb) {
         LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
-        for (DestRecord dest : destdb.records()) {
-            if (dest.blocked()) {
-                srcdb.markAsHandled(dest.getKey());
+        for (Record dest : destdb.records()) {
+            final String key=dest.getKey();
+            if (destdb.updateBlocked(key)) {
+                handled.add(key);
                 continue;
             }
-            if (! srcdb.recordExists(dest.getKey()))
+            if (! srcdb.recordExists(key))
                 continue;
-            SourceRecord src = srcdb.getRecord(dest.getKey());
-            if (! src.deleted()) {
+            Record src = srcdb.getRecord(key);
+            if (! srcdb.deleteDesired(key)) {
                 destdb.delete(dest);
                 continue;
             }
@@ -40,9 +43,11 @@ public class Syncer {
             if (diffs.size()>0)
                 destdb.update(dest, diffs);
             else
-                System.out.println("identical for "+dest.getKey());
+                System.out.println("identical for "+key);
         }
-        for (SourceRecord src: srcdb.unhandledRecords())
-            destdb.create(src);
+        for (Record src: srcdb.records()) {
+            if (!handled.contains(src.getKey()))
+                destdb.create(src);
+        }
     }
 }

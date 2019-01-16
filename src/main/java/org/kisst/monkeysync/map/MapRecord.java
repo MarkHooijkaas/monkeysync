@@ -2,14 +2,12 @@ package org.kisst.monkeysync.map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.kisst.monkeysync.DestRecord;
 import org.kisst.monkeysync.Record;
-import org.kisst.monkeysync.SourceRecord;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MapRecord implements DestRecord, SourceRecord {
+public class MapRecord implements Record {
     private final String key;
     private final LinkedHashMap<String,String> fields;
 
@@ -37,8 +35,6 @@ public class MapRecord implements DestRecord, SourceRecord {
     private final static Gson gson = new GsonBuilder().create();
     public String toJson() { return gson.toJson(fields); }
     @Override public String getKey() { return key;}
-    @Override public boolean blocked() { return false;}
-    @Override public boolean deleted() { return false;}
     @Override public Iterable<String> fieldNames() { return fields.keySet();}
     @Override public String getField(String name) { return fields.get(name);}
     public void merge(Map<String, String> diffs) {
