@@ -3,15 +3,16 @@ package org.kisst.monkeysync.sql;
 import org.kisst.monkeysync.map.MapRecord;
 import org.kisst.monkeysync.map.MapSource;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.sql.*;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 
 public class SqlSource extends MapSource {
 
-    public SqlSource(ResultSet rs) {
-        try {
+    public SqlSource(Properties props, String sql) {
+        try (Connection conn = connect(props)){
+            ResultSet rs = conn.createStatement().executeQuery(sql);
             ResultSetMetaData columns = rs.getMetaData();
             int nrofColumns = columns.getColumnCount();
             while (rs.next()) {
@@ -29,4 +30,18 @@ public class SqlSource extends MapSource {
         }
         catch (SQLException e) { throw new RuntimeException(e); }
     }
+
+    private Connection connect(Properties props) {
+        try {
+            Class.forName(props.getProperty("class"));
+
+            String user=props.getProperty("user");
+            String password=props.getProperty("password");
+            String url = props.getProperty("url");
+            return DriverManager.getConnection(url, user, password);
+        }
+        catch (ClassNotFoundException e) { throw new RuntimeException(e);}
+        catch (SQLException e) { throw new RuntimeException(e);}
+    }
+
 }
