@@ -1,15 +1,8 @@
 package org.kisst.monkeysync.map;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.kisst.monkeysync.*;
+import org.kisst.monkeysync.Record;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class MapTable extends BaseTable<MapRecord> {
     private final LinkedHashMap<String, Record> records = new LinkedHashMap<>();

@@ -20,11 +20,6 @@ public class MapRecord implements Record {
         this.fields=new LinkedHashMap<>(m);
     }
 
-    public MapRecord(String key) {
-        this.key = key;
-        this.fields=new LinkedHashMap<>();
-    }
-
     public MapRecord(Record rec) {
         this.fields=new LinkedHashMap<>();
         this.key=rec.getKey();
