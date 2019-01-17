@@ -37,8 +37,5 @@ public class MapRecord implements Record {
     @Override public String getKey() { return key;}
     @Override public Iterable<String> fieldNames() { return fields.keySet();}
     @Override public String getField(String name) { return fields.get(name);}
-    public void merge(Map<String, String> diffs) {
-        for (String field: diffs.keySet())
-            fields.put(field, diffs.get(field));
-    }
+    @Override public void   setField(String name, String value) { fields.put(name, value);}
 }
