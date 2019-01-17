@@ -1,5 +1,6 @@
 package org.kisst.monkeysync;
 
+import org.kisst.monkeysync.sql.Script;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -40,7 +41,8 @@ public class SyncCli implements Runnable{
     }
 
     public static void main(String... args) {
-        CommandLine.run(new SyncCli(), System.err, args);
+        new Script(String.join(" ",args));
+//        CommandLine.run(new SyncCli(), System.err, args);
     }
 
 }
