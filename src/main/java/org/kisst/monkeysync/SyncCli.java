@@ -38,28 +38,13 @@ public class SyncCli implements Runnable{
         if (interactive)
             syncer.setInteractive(true);
 
-        syncer.info("Loading source ",src);
-        System.out.println(props.getProps(src));
-        System.out.println("-----");
-        syncer.info("Loading destination ",dest);
-        System.out.println(props.getProps(dest));
-        syncer.info("Loading source ",dest);
+        syncer.setSource(src, props.getProps(src));
+        syncer.setDestination(dest, props.getProps(dest));
+        syncer.sync();
     }
 
     public static void main(String... args) {
         CommandLine.run(new SyncCli(), System.err, args);
     }
 
-    public Table getTable(String name, Props props) {
-        String type=props.getString("type");
-        if ("SqlTable".equals(type))
-            return new SqlTable(props);
-        if ("MailchimpTable".equals(type))
-            return new MailchimpTable(props);
-        if ("MapTable".equals(type))
-            return new MapTable();
-        if ("JsonFileTable".equals(type))
-            return new JsonFileTable(props);
-        throw new RuntimeException("Unknow table type "+type);
-    }
 }

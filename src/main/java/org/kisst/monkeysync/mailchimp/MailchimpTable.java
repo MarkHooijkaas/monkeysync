@@ -2,7 +2,7 @@ package org.kisst.monkeysync.mailchimp;
 
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
-import org.kisst.monkeysync.json.JsonBuilder;
+import org.kisst.monkeysync.json.JsonHelper;
 import org.kisst.monkeysync.map.MapTable;
 
 import java.util.Map;
@@ -20,12 +20,12 @@ public class MailchimpTable extends MapTable {
 
     @Override public void create(Record srcrec) {
         super.create(srcrec);
-        connector.createMember(srcrec.getKey(), JsonBuilder.toJson(srcrec));
+        connector.createMember(srcrec.getKey(), JsonHelper.toJson(srcrec));
     }
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
         super.update(destrec,diffs);
-        connector.updateMemberFields(destrec.getKey(), JsonBuilder.toJson(diffs));
+        connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs));
     }
 
     @Override public void delete(Record destrec) {

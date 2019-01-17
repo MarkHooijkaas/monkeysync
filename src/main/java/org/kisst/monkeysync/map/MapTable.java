@@ -27,6 +27,7 @@ public class MapTable implements Table {
     @Override public boolean updateBlocked(String key) { return false; }
 
     @Override public MapRecord getRecord(String key) { return records.get(key);}
+    @Override public int size() { return records.size();}
 
     @Override public Iterable<Record> records() {
         ArrayList<Record> result = new ArrayList<>();

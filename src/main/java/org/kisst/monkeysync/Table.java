@@ -7,6 +7,7 @@ public interface Table {
     boolean deleteDesired(String key);
     boolean updateBlocked(String key);
 
+    int size();
     Iterable<Record> records();
     Record getRecord(String key);
 
