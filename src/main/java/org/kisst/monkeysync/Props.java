@@ -9,7 +9,44 @@ import java.util.Properties;
 public class Props {
     private final LinkedHashMap<String,String> props=new LinkedHashMap<>();
 
-    public String getString(String key) { return props.get(key);}
+    public String getString(String key, String defaultValue) {
+        String result = props.get(key);
+        if (result==null)
+            return defaultValue;
+        return result;
+    }
+    public Boolean getBoolean(String key, boolean defaultValue) {
+        String result = props.get(key);
+        if (result==null)
+            return defaultValue;
+        return Boolean.getBoolean(result);
+    }
+    public int getInt(String key, int defaultValue) {
+        String result = props.get(key);
+        if (result==null)
+            return defaultValue;
+        return Integer.getInteger(result);
+    }
+
+    public String getString(String key) {
+        String result = props.get(key);
+        if (result==null)
+            throw new RuntimeException("Could not find string property "+key);
+        return result;
+    }
+    public Boolean getBoolean(String key) {
+        String result = props.get(key);
+        if (result==null)
+            throw new RuntimeException("Could not find boolean property "+key);
+        return Boolean.getBoolean(result);
+    }
+    public int getInt(String key) {
+        String result = props.get(key);
+        if (result==null)
+            throw new RuntimeException("Could not find int property "+key);
+        return Integer.getInteger(result);
+    }
+
     public Props  getProps(String prefix) {
         if (! prefix.endsWith("."))
             prefix+=".";
