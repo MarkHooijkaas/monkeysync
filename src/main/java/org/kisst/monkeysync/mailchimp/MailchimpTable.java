@@ -1,18 +1,13 @@
 package org.kisst.monkeysync.mailchimp;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
-import org.kisst.monkeysync.Table;
 import org.kisst.monkeysync.json.JsonHelper;
 import org.kisst.monkeysync.map.BaseTable;
 
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,11 +24,34 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
             retrieveAllMembers();
     }
 
+    protected boolean mayRecordBeChanged(MailchimpRecord rec) {
+        if (rec==null)
+            return false;
+        if ("unsubscribed".equals(rec.status))
+            return false;
+        if ("cleaned".equals(rec.status))
+            return false;
+        return true;
+    }
+
+    @Override public boolean mayDeleteRecord(String key) {
+        MailchimpRecord rec = records.get(key);
+        if (! mayRecordBeChanged(rec))
+            return false;
+        return true;
+    }
+    @Override public boolean mayUpdateRecord(String key) {
+        MailchimpRecord rec = records.get(key);
+        if (! mayRecordBeChanged(rec))
+            return false;
+        return true;
+    }
+
     PrintWriter out;
     public void retrieveAllMembers() {
         try (FileOutputStream f=new FileOutputStream("mc-log.json")) {
             out= new PrintWriter(f);
-            connector.insertAllMembers(this, 37000, 1000); // Not too big, since there is still ssome arihtmetic done
+            connector.insertAllMembers(this, 0, 999999); // Not too big, since there is still ssome arihtmetic done
             out.close();
         }
         catch (IOException e) {throw  new RuntimeException(e); }

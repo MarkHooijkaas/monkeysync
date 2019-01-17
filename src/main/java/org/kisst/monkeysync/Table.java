@@ -4,11 +4,15 @@ import java.util.Map;
 
 public interface Table {
     boolean recordExists(String key);
-    boolean deleteDesired(String key);
-    boolean updateBlocked(String key);
+    boolean mayCreateRecord(String key);
+    boolean mayUpdateRecord(String key);
+    boolean mayDeleteRecord(String key);
+
+    boolean isDeleteDesired(String key);
 
     int size();
     Iterable<Record> records();
+
     Record getRecord(String key);
 
     void create(Record srcrec);

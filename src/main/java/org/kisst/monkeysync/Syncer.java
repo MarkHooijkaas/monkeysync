@@ -5,17 +5,14 @@ import org.kisst.monkeysync.mailchimp.MailchimpTable;
 import org.kisst.monkeysync.map.MapTable;
 import org.kisst.monkeysync.sql.SqlTable;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public class Syncer {
-    private final HashSet<String> handled = new HashSet<>();
     private boolean quiet=false;
     private boolean verbose=false;
     private boolean debug=false;
     private boolean interactive=false;
-    private Table srcdb;
-    private Table destdb;
+    private boolean enableDeleteMissingRecords =false;
 
     /**
      * This method will sync all records from the source into the destination.
@@ -25,64 +22,97 @@ public class Syncer {
      * - create any records that exist only in the source, but not (yet) in the destination
      * Note: if the destination record has any fields that are not know in the source record they are ignored (they are not deleted)
      */
-    public void sync() {
-        int deleted=0;
-        int identical=0;
-        int merged=0;
-        int created=0;
-        int skipped=0;
+    public void syncAll(Table srcdb, Table destdb) {
+        int count=createNewRecords(srcdb,destdb);
+        info("created :", ""+count);
 
-        LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
-        for (Record dest : destdb.records()) {
-            final String key=dest.getKey();
-            handled.add(key);
-            if (destdb.updateBlocked(key)) {
-                verbose("skipping blocked destination: ",key);
-                skipped++;
-                continue;
-            }
-            if (! srcdb.recordExists(key))
-                continue;
-            Record src = srcdb.getRecord(key);
-            if (srcdb.deleteDesired(key)) {
-                verbose("deleting destination: ",key);
-                destdb.delete(dest);
-                deleted++;
-                continue;
-            }
-            diffs.clear();
-            for (String fieldName: src.fieldNames()) {
-                String value=src.getField(fieldName);
-                if (value==null)
-                    continue;
-                if (! value.equals(dest.getField(fieldName))) // TODO: what if empty string
-                    diffs.put(fieldName, value);
-            }
-            // System.out.println(diffs.size()+" for "+dest.getKey());
-            if (diffs.size()>0) {
-                destdb.update(dest, diffs);
-                verbose("merging: ",key);
-                merged++;
-            }
-            else {
-                debug("identical for ", key);
-                identical++;
-            }
+        count=updateRecords(srcdb,destdb);
+        info("updated:", ""+count);
+
+        count=deleteInactiveRecords(srcdb,destdb);
+        info("deleted :", ""+count);
+
+        if (enableDeleteMissingRecords) {
+            count=deleteMissingRecords(srcdb,destdb);
+            info("deleted missing records:", ""+count);
         }
-        for (Record src: srcdb.records()) {
-            if (!handled.contains(src.getKey())) {
+    }
+
+    public int createNewRecords(Table srcdb, Table destdb) {
+        int count=0;
+        for (Record src : srcdb.records()) {
+            final String key = src.getKey();
+            if (destdb.mayCreateRecord(key)) {
                 destdb.create(src);
                 verbose("created ",src.getKey());
-                created++;
+                count++;
             }
         }
-        info("created :", ""+created);
-        info("deleted :", ""+deleted);
-        info("merged :", ""+merged);
-        info("skipped :", ""+skipped);
-        info("identical:", ""+identical);
-
+        return count;
     }
+
+    public int updateRecords(Table srcdb, Table destdb) {
+        int count=0;
+        int identical=0;
+        LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
+        for (Record src : srcdb.records()) {
+            final String key = src.getKey();
+            Record dest=destdb.getRecord(key);
+            if (destdb.mayUpdateRecord(key)) {
+                diffs.clear();
+                for (String fieldName: src.fieldNames()) {
+                    String value=src.getField(fieldName);
+                    if (value==null)
+                        continue;
+                    if (! value.equals(dest.getField(fieldName))) // TODO: what if empty string
+                        diffs.put(fieldName, value);
+                }
+                // System.out.println(diffs.size()+" for "+dest.getKey());
+                if (diffs.size()>0) {
+                    destdb.update(dest, diffs);
+                    verbose("merging: ",key);
+                    count++;
+                }
+                else {
+                    debug("identical for ", key);
+                    identical++;
+                }
+            }
+        }
+        debug("Total identical: ",""+identical);
+        return count;
+    }
+
+
+    public int deleteInactiveRecords(Table srcdb, Table destdb) {
+        int count = 0;
+        for (Record src : srcdb.records()) {
+            final String key = src.getKey();
+            if (srcdb.isDeleteDesired(key) && destdb.mayDeleteRecord(key)) {
+                destdb.delete(src);
+                verbose("deleted ", src.getKey());
+                count++;
+            }
+        }
+        return count;
+    }
+    public int deleteMissingRecords(Table srcdb, Table destdb) {
+        int count=0;
+        if (false) {
+            for (Record dest : destdb.records()) {
+                final String key = dest.getKey();
+                if (destdb.mayDeleteRecord(key) && !srcdb.recordExists(key)) {
+                    destdb.delete(dest);
+                    verbose("deleted record which does not exist at source ",key);
+                    count++;
+
+                }
+            }
+        }
+        return count;
+    }
+
+
 
     public void setDebug(boolean b) { this.debug=b;}
     public void setVerbose(boolean b) { this.verbose=b;}
@@ -107,17 +137,6 @@ public class Syncer {
             System.console().readLine();
         }
         return true;
-    }
-
-    public void setSource(String name, Props props) {
-        verbose("Loading source ", name);
-        srcdb=getTable(props);
-        info("Loaded "+srcdb.size()+" records from ", name);
-    }
-    public void setDestination(String name, Props props) {
-        verbose("Loading destination ", name);
-        destdb=getTable(props);
-        info("Loaded "+destdb.size()+" records from ", name);
     }
 
     public Table getTable(Props props) {

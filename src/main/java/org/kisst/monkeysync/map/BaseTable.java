@@ -21,10 +21,12 @@ public abstract class BaseTable<R extends Record> implements Table {
         this.records=records;
     }
 
-
     @Override public boolean recordExists(String key)  { return records.containsKey(key);}
-    @Override public boolean deleteDesired(String key) { return false; }
-    @Override public boolean updateBlocked(String key) { return false; }
+    @Override public boolean isDeleteDesired(String key) { return false; }
+    @Override public boolean mayDeleteRecord(String key) { return recordExists(key); }
+    @Override public boolean mayUpdateRecord(String key) { return recordExists(key); }
+    @Override public boolean mayCreateRecord(String key) { return ! recordExists(key); }
+
 
     @Override public Record getRecord(String key) { return records.get(key);}
     @Override public int size() { return records.size();}
