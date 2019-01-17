@@ -34,8 +34,10 @@ public class MapRecord implements Record {
 
     private final static Gson gson = new GsonBuilder().create();
     public String toJson() { return gson.toJson(fields); }
+
     @Override public String getKey() { return key;}
     @Override public Iterable<String> fieldNames() { return fields.keySet();}
     @Override public String getField(String name) { return fields.get(name);}
     @Override public void   setField(String name, String value) { fields.put(name, value);}
+
 }

@@ -1,7 +1,6 @@
 package org.kisst.monkeysync.sql;
 
 import org.kisst.monkeysync.Props;
-import org.kisst.monkeysync.map.MapRecord;
 import org.kisst.monkeysync.map.MapTable;
 
 import java.io.IOException;
@@ -26,7 +25,7 @@ public class SqlTable extends MapTable {
             int nrofColumns = columns.getColumnCount();
             while (rs.next()) {
                 LinkedHashMap<String, String> map= new LinkedHashMap<>();
-                //MapRecord rec=new MapRecord();
+                //Record rec=new Record();
                 for (int i = 1; i < nrofColumns; i++) {
                     String colname=columns.getColumnName(i);
                     String value=rs.getString(i);
@@ -34,7 +33,7 @@ public class SqlTable extends MapTable {
                     map.put(colname, value);
                 }
                 String key=rs.getString(1);
-                create(new MapRecord(key, map));
+                create(new Record(key, map));
             }
         }
         catch (SQLException e) { throw new RuntimeException(e); }
