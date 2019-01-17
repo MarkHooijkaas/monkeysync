@@ -15,7 +15,7 @@ public class JsonBuilder {
         if (value==null)
             return;
         result.append('"');
-        addUnescapedField(fieldName, escapeJsonString(value));
+        addUnescapedField(fieldName, JsonHelper.escapeJsonString(value));
         result.append('"');
     }
 
@@ -28,28 +28,4 @@ public class JsonBuilder {
     }
 
 
-
-    public static String toJson(Record rec) {
-        JsonBuilder builder = new JsonBuilder();
-        for (String fieldName : rec.fieldNames())
-            builder.addStringField(fieldName, rec.getField(fieldName));
-        return builder.toString();
-    }
-
-    public static String toJson(Map<String, String> map) {
-        JsonBuilder builder = new JsonBuilder();
-        for (String fieldName : map.keySet())
-            builder.addStringField(fieldName, map.get(fieldName));
-        return builder.toString();
-    }
-
-    public static String escapeJsonString(String str) {
-        return str.replace("\\","\\\\")
-                .replace("\b","\\b")
-                .replace("\n","\\n")
-                .replace("\r","\\r")
-                .replace("\f","\\f")
-                .replace("\t","\\t")
-                .replace("\"","\\\"");
-    }
 }

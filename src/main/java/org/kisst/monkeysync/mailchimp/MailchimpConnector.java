@@ -1,6 +1,7 @@
 package org.kisst.monkeysync.mailchimp;
 
 import okhttp3.*;
+import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.json.JsonBuilder;
 
 import javax.xml.bind.DatatypeConverter;
@@ -12,15 +13,13 @@ public class MailchimpConnector {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private final String baseurl;
-    private final String dc;
     private final String apikey;
     private final String listid;
 
-    public MailchimpConnector(String dc, String listid, String apikey) {
-        this.baseurl = "https://"+dc+".api.mailchimp.com/3.0/lists/"+listid;
-        this.dc=dc;
-        this.apikey=apikey;
-        this.listid=listid;
+    public MailchimpConnector(Props props) {
+        this.listid=props.getString("listid");
+        this.baseurl = props.getString("url")+"lists/"+listid;
+        this.apikey=props.getString("apikey");
     }
 
 

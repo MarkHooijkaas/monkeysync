@@ -1,5 +1,6 @@
 package org.kisst.monkeysync.mailchimp;
 
+import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.json.JsonBuilder;
 import org.kisst.monkeysync.map.MapTable;
@@ -9,8 +10,8 @@ import java.util.Map;
 public class MailchimpTable extends MapTable {
     private final MailchimpConnector connector;
 
-    public MailchimpTable(MailchimpConnector connector) {
-        this.connector = connector;
+    public MailchimpTable(Props props) {
+        this.connector = new MailchimpConnector(props);
     }
 
     @Override public Iterable<Record> records() {
