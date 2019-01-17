@@ -1,17 +1,8 @@
 package org.kisst.monkeysync;
 
-import org.kisst.monkeysync.json.JsonFileTable;
-import org.kisst.monkeysync.mailchimp.MailchimpTable;
-import org.kisst.monkeysync.map.MapTable;
-import org.kisst.monkeysync.sql.SqlTable;
-
 import java.util.LinkedHashMap;
 
 public class Syncer {
-    private boolean quiet=false;
-    private boolean verbose=false;
-    private boolean debug=false;
-    private boolean interactive=false;
     private boolean enableDeleteMissingRecords =false;
 
     /**
@@ -24,17 +15,17 @@ public class Syncer {
      */
     public void syncAll(Table srcdb, Table destdb) {
         int count=createNewRecords(srcdb,destdb);
-        info("created :", ""+count);
+        Env.info("created :", ""+count);
 
         count=updateRecords(srcdb,destdb);
-        info("updated:", ""+count);
+        Env.info("updated:", ""+count);
 
         count=deleteInactiveRecords(srcdb,destdb);
-        info("deleted :", ""+count);
+        Env.info("deleted :", ""+count);
 
         if (enableDeleteMissingRecords) {
             count=deleteMissingRecords(srcdb,destdb);
-            info("deleted missing records:", ""+count);
+            Env.info("deleted missing records:", ""+count);
         }
     }
 
@@ -44,7 +35,7 @@ public class Syncer {
             final String key = src.getKey();
             if (destdb.mayCreateRecord(key)) {
                 destdb.create(src);
-                verbose("created ",src.getKey());
+                Env.verbose("created ",src.getKey());
                 count++;
             }
         }
@@ -70,16 +61,16 @@ public class Syncer {
                 // System.out.println(diffs.size()+" for "+dest.getKey());
                 if (diffs.size()>0) {
                     destdb.update(dest, diffs);
-                    verbose("merging: ",key);
+                    Env.verbose("merging: ",key);
                     count++;
                 }
                 else {
-                    debug("identical for ", key);
+                    Env.debug("identical for ", key);
                     identical++;
                 }
             }
         }
-        debug("Total identical: ",""+identical);
+        Env.debug("Total identical: ",""+identical);
         return count;
     }
 
@@ -90,7 +81,7 @@ public class Syncer {
             final String key = src.getKey();
             if (srcdb.isDeleteDesired(key) && destdb.mayDeleteRecord(key)) {
                 destdb.delete(src);
-                verbose("deleted ", src.getKey());
+                Env.verbose("deleted ", src.getKey());
                 count++;
             }
         }
@@ -103,52 +94,12 @@ public class Syncer {
                 final String key = dest.getKey();
                 if (destdb.mayDeleteRecord(key) && !srcdb.recordExists(key)) {
                     destdb.delete(dest);
-                    verbose("deleted record which does not exist at source ",key);
+                    Env.verbose("deleted record which does not exist at source ",key);
                     count++;
 
                 }
             }
         }
         return count;
-    }
-
-
-
-    public void setDebug(boolean b) { this.debug=b;}
-    public void setVerbose(boolean b) { this.verbose=b;}
-    public void setInteractive(boolean b) { this.interactive=b;}
-
-    public void info(String s, String key) {
-        if (!quiet )
-            System.out.println(s+key);
-    }
-    public void verbose(String s, String key) {
-        if (!quiet && verbose || debug)
-            System.out.println(s+key);
-    }
-    public void debug(String s, String key) {
-        if (!quiet && debug)
-            System.out.println(s+key);
-    }
-    public boolean ask(String s) {
-        if (verbose || interactive ||debug)
-            System.out.println(s);
-        if (interactive) {
-            System.console().readLine();
-        }
-        return true;
-    }
-
-    public Table getTable(Props props) {
-        String type=props.getString("type");
-        if ("SqlTable".equals(type))
-            return new SqlTable(props,"");
-        if ("MailchimpTable".equals(type))
-            return new MailchimpTable(props);
-        if ("MapTable".equals(type))
-            return new MapTable();
-        if ("JsonFileTable".equals(type))
-            return new JsonFileTable(props);
-        throw new RuntimeException("Unknow table type "+type);
     }
 }

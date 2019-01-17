@@ -30,18 +30,12 @@ public class SyncCli implements Runnable{
         props.loadProps(new File(configFile));
         Syncer syncer=new Syncer();
         if (verbose)
-            syncer.setVerbose(true);
+            Env.verbosity=2;
         if (interactive)
-            syncer.setInteractive(true);
+            Env.interactive=true;
 
-        syncer.verbose("Loading source ",src);
-        Table srcdb=syncer.getTable(props.getProps(src));
-        syncer.info("Loaded "+srcdb.size()+" records from ", src);
-
-        syncer.verbose("Loading destination ", dest);
-        Table destdb=syncer.getTable(props.getProps(dest));
-        syncer.info("Loaded "+destdb.size()+" records from ", dest);
-
+        Table srcdb=Env.getTable(src);
+        Table destdb=Env.getTable(dest);
         syncer.syncAll(srcdb,destdb);
     }
 
