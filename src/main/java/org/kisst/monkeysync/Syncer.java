@@ -13,28 +13,28 @@ public class Syncer {
      * - create any records that exist only in the source, but not (yet) in the destination
      * Note: if the destination record has any fields that are not know in the source record they are ignored (they are not deleted)
      */
-    public void syncAll(Table srcdb, Table destdb) {
-        int count=createNewRecords(srcdb,destdb);
+    public void syncAll(Table srcTable, Table destTable) {
+        int count=createNewRecords(srcTable,destTable);
         Env.info("created :", ""+count);
 
-        count=updateRecords(srcdb,destdb);
+        count=updateRecords(srcTable,destTable);
         Env.info("updated:", ""+count);
 
-        count=deleteInactiveRecords(srcdb,destdb);
+        count=deleteInactiveRecords(srcTable,destTable);
         Env.info("deleted :", ""+count);
 
         if (enableDeleteMissingRecords) {
-            count=deleteMissingRecords(srcdb,destdb);
+            count=deleteMissingRecords(srcTable,destTable);
             Env.info("deleted missing records:", ""+count);
         }
     }
 
-    public int createNewRecords(Table srcdb, Table destdb) {
+    public int createNewRecords(Table srcTable, Table destTable) {
         int count=0;
-        for (Record src : srcdb.records()) {
+        for (Record src : srcTable.records()) {
             final String key = src.getKey();
-            if (destdb.mayCreateRecord(key)) {
-                destdb.create(src);
+            if (destTable.mayCreateRecord(key)) {
+                destTable.create(src);
                 Env.verbose("created ",src.getKey());
                 count++;
             }
@@ -42,14 +42,14 @@ public class Syncer {
         return count;
     }
 
-    public int updateRecords(Table srcdb, Table destdb) {
+    public int updateRecords(Table srcTable, Table destTable) {
         int count=0;
         int identical=0;
         LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
-        for (Record src : srcdb.records()) {
+        for (Record src : srcTable.records()) {
             final String key = src.getKey();
-            Record dest=destdb.getRecord(key);
-            if (destdb.mayUpdateRecord(key)) {
+            Record dest=destTable.getRecord(key);
+            if (destTable.mayUpdateRecord(key)) {
                 diffs.clear();
                 for (String fieldName: src.fieldNames()) {
                     String value=src.getField(fieldName);
@@ -60,7 +60,7 @@ public class Syncer {
                 }
                 // System.out.println(diffs.size()+" for "+dest.getKey());
                 if (diffs.size()>0) {
-                    destdb.update(dest, diffs);
+                    destTable.update(dest, diffs);
                     Env.verbose("merging: ",key);
                     count++;
                 }
@@ -75,25 +75,25 @@ public class Syncer {
     }
 
 
-    public int deleteInactiveRecords(Table srcdb, Table destdb) {
+    public int deleteInactiveRecords(Table srcTable, Table destTable) {
         int count = 0;
-        for (Record src : srcdb.records()) {
+        for (Record src : srcTable.records()) {
             final String key = src.getKey();
-            if (srcdb.isDeleteDesired(key) && destdb.mayDeleteRecord(key)) {
-                destdb.delete(src);
+            if (srcTable.isDeleteDesired(key) && destTable.mayDeleteRecord(key)) {
+                destTable.delete(src);
                 Env.verbose("deleted ", src.getKey());
                 count++;
             }
         }
         return count;
     }
-    public int deleteMissingRecords(Table srcdb, Table destdb) {
+    public int deleteMissingRecords(Table srcTable, Table destTable) {
         int count=0;
         if (false) {
-            for (Record dest : destdb.records()) {
+            for (Record dest : destTable.records()) {
                 final String key = dest.getKey();
-                if (destdb.mayDeleteRecord(key) && !srcdb.recordExists(key)) {
-                    destdb.delete(dest);
+                if (destTable.mayDeleteRecord(key) && !srcTable.recordExists(key)) {
+                    destTable.delete(dest);
                     Env.verbose("deleted record which does not exist at source ",key);
                     count++;
 

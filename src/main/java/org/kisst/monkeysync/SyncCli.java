@@ -34,9 +34,9 @@ public class SyncCli implements Runnable{
         if (interactive)
             Env.interactive=true;
 
-        Table srcdb=Env.getTable(src);
-        Table destdb=Env.getTable(dest);
-        syncer.syncAll(srcdb,destdb);
+        Table srcTable=Env.getTable(src);
+        Table destTable=Env.getTable(dest);
+        syncer.syncAll(srcTable,destTable);
     }
 
     public static void main(String... args) {
