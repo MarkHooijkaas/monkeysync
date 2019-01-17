@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 
@@ -15,6 +16,15 @@ public class SqlTable extends MapTable {
 
     public SqlTable(Props props) {
         String sql=props.getString("sql");
+        String ignoreColumnsList=props.getString("ignoreColumns");
+        HashSet<String> ignoreColumns=new HashSet<>();
+        if (ignoreColumnsList!=null) {
+            for (String col: ignoreColumnsList.split(",")) {
+                if (col.trim().length()>0)
+                    ignoreColumns.add(col.trim());
+            }
+        }
+
         if (sql==null) {
             try {
                 sql = new String(Files.readAllBytes(Paths.get(props.getString("sqlfile"))));
@@ -29,6 +39,8 @@ public class SqlTable extends MapTable {
                 //Record rec=new Record();
                 for (int i = 1; i < nrofColumns; i++) {
                     String colname=columns.getColumnName(i);
+                    if (ignoreColumns.contains(colname))
+                        continue;
                     String value=rs.getString(i);
                     //System.out.println(colname+i+value);
                     map.put(colname, value);
