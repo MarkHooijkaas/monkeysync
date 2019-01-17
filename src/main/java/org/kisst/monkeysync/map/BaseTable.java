@@ -45,10 +45,8 @@ public abstract class BaseTable<R extends Record> implements Table {
         records.put(srcrec.getKey(), createRecord(srcrec));}
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
-        R newrec = createRecord(destrec);
         for (String field: diffs.keySet())
-           newrec.setField(field, diffs.get(field));
-        create(newrec);
+           destrec.setField(field, diffs.get(field));
     }
     @Override public void delete(Record destrec) { records.remove(destrec.getKey());}
 

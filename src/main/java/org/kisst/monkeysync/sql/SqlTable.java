@@ -14,9 +14,13 @@ import java.util.LinkedHashMap;
 
 public class SqlTable extends MapTable {
 
-    public SqlTable(Props props) {
-        String sql=props.getString("sql");
-        String ignoreColumnsList=props.getString("ignoreColumns");
+    public SqlTable(Props globalprops, String propkey) {
+        Props props=globalprops.getProps(propkey);
+        Props dbprops=props;
+        if (props.getString("db",null)!=null)
+            dbprops=globalprops.getProps(props.getString("db"));
+
+        String ignoreColumnsList=props.getString("ignoreColumns",null);
         HashSet<String> ignoreColumns=new HashSet<>();
         if (ignoreColumnsList!=null) {
             for (String col: ignoreColumnsList.split(",")) {
@@ -25,12 +29,13 @@ public class SqlTable extends MapTable {
             }
         }
 
+        String sql=props.getString("sql",null);
         if (sql==null) {
             try {
                 sql = new String(Files.readAllBytes(Paths.get(props.getString("sqlfile"))));
             } catch (IOException e) { throw new RuntimeException(e);}
         }
-        try (Connection conn = connect(props)){
+        try (Connection conn = connect(dbprops)){
             ResultSet rs = conn.createStatement().executeQuery(sql);
             ResultSetMetaData columns = rs.getMetaData();
             int nrofColumns = columns.getColumnCount();

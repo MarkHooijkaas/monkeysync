@@ -142,7 +142,7 @@ public class Syncer {
     public Table getTable(Props props) {
         String type=props.getString("type");
         if ("SqlTable".equals(type))
-            return new SqlTable(props);
+            return new SqlTable(props,"");
         if ("MailchimpTable".equals(type))
             return new MailchimpTable(props);
         if ("MapTable".equals(type))

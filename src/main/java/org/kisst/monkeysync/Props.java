@@ -19,13 +19,13 @@ public class Props {
         String result = props.get(key);
         if (result==null)
             return defaultValue;
-        return Boolean.getBoolean(result);
+        return Boolean.parseBoolean(result);
     }
     public int getInt(String key, int defaultValue) {
         String result = props.get(key);
         if (result==null)
             return defaultValue;
-        return Integer.getInteger(result);
+        return Integer.parseInt(result);
     }
 
     public String getString(String key) {
@@ -38,13 +38,13 @@ public class Props {
         String result = props.get(key);
         if (result==null)
             throw new RuntimeException("Could not find boolean property "+key);
-        return Boolean.getBoolean(result);
+        return Boolean.parseBoolean(result);
     }
     public int getInt(String key) {
         String result = props.get(key);
         if (result==null)
             throw new RuntimeException("Could not find int property "+key);
-        return Integer.getInteger(result);
+        return Integer.parseInt(result);
     }
 
     public Props  getProps(String prefix) {

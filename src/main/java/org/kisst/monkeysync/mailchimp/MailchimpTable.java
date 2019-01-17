@@ -15,11 +15,13 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     private final MailchimpConnector connector;
     public boolean updatesAllowed=false;
     private int maxsize;
+    private final String necessaryInterest;
 
     public MailchimpTable(Props props) {
         super(new LinkedHashMap<>());
         this.connector = new MailchimpConnector(props);
-        this.maxsize= props.getInt("maxsize", 130);
+        this.maxsize= props.getInt("maxsize", 999999); // Not too big, since there is still ssome arihtmetic done
+        this.necessaryInterest = props.getString("necessaryInterest", null);
         if (props.getBoolean("autoload", true))
             retrieveAllMembers();
     }
@@ -31,6 +33,13 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
             return false;
         if ("cleaned".equals(rec.status))
             return false;
+        if ("pending".equals(rec.status))
+            return false;
+        if (necessaryInterest!=null) {
+           Boolean b = rec.interests.get(necessaryInterest);
+           if (b==null || b==false)
+               return false;
+        }
         return true;
     }
 
@@ -51,7 +60,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     public void retrieveAllMembers() {
         try (FileOutputStream f=new FileOutputStream("mc-log.json")) {
             out= new PrintWriter(f);
-            connector.insertAllMembers(this, 0, 999999); // Not too big, since there is still ssome arihtmetic done
+            connector.insertAllMembers(this, 0, maxsize);
             out.close();
         }
         catch (IOException e) {throw  new RuntimeException(e); }
@@ -66,7 +75,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         //LinkedHashMap<String, String> map = gson.fromJson(json, LinkedHashMap.class);
         return new MailchimpRecord(json);
     }
-    @Override protected MailchimpRecord createRecord(Record rec) { return new MailchimpRecord(rec);}
+    @Override protected MailchimpRecord createRecord(Record rec) { return new MailchimpRecord(rec, necessaryInterest);}
 
 
 

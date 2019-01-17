@@ -1,9 +1,5 @@
 package org.kisst.monkeysync;
 
-import org.kisst.monkeysync.json.JsonFileTable;
-import org.kisst.monkeysync.mailchimp.MailchimpTable;
-import org.kisst.monkeysync.map.MapTable;
-import org.kisst.monkeysync.sql.SqlTable;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -38,9 +34,15 @@ public class SyncCli implements Runnable{
         if (interactive)
             syncer.setInteractive(true);
 
-        syncer.setSource(src, props.getProps(src));
-        syncer.setDestination(dest, props.getProps(dest));
-        syncer.sync();
+        syncer.verbose("Loading source ",src);
+        Table srcdb=syncer.getTable(props.getProps(src));
+        syncer.info("Loaded "+srcdb.size()+" records from ", src);
+
+        syncer.verbose("Loading destination ", dest);
+        Table destdb=syncer.getTable(props.getProps(dest));
+        syncer.info("Loaded "+destdb.size()+" records from ", dest);
+
+        syncer.syncAll(srcdb,destdb);
     }
 
     public static void main(String... args) {

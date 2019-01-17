@@ -9,14 +9,16 @@ public class MailchimpRecord implements Record {
 
     public final String email_address;
     public final String status;
-    private final LinkedHashMap<String, Boolean> interests;
+    public final LinkedHashMap<String, Boolean> interests;
     private final LinkedHashMap<String,String> merge_fields;
 
 
-    public MailchimpRecord(Record rec) {
+    public MailchimpRecord(Record rec, String interest) {
         this.email_address=rec.getKey();
         this.status="subscribed";
         this.interests=new LinkedHashMap<>();
+        if (interest!=null)
+            interests.put(interest,true);
         this.merge_fields=new LinkedHashMap<>();
         for (String field : rec.fieldNames())
             merge_fields.put(field, rec.getField(field));
