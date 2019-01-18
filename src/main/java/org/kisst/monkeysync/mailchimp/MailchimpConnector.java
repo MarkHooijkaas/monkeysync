@@ -2,6 +2,7 @@ package org.kisst.monkeysync.mailchimp;
 
 import com.google.gson.Gson;
 import okhttp3.*;
+import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.json.JsonBuilder;
 
@@ -95,7 +96,7 @@ public class MailchimpConnector {
         int max_item=offset+count;
         do {
             String httpresult = getMembers(offset, Math.min(count,pagesize));
-            //System.out.println(httpresult);
+            Env.verbose(httpresult, "");
             respons =gson.fromJson(httpresult,MailchimpMemberResponse.class);
             count-=pagesize;
             offset+=pagesize;

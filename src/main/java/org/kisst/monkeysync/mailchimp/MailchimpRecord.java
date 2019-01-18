@@ -29,7 +29,7 @@ public class MailchimpRecord implements Record {
         LinkedHashMap<String, Object> map = gson.fromJson(json, LinkedHashMap.class);
         this.email_address= (String) map.get("email_address");
         this.status = (String) map.get("status");
-        this.interests= (LinkedHashMap<String, Boolean>) map.get("interests");
+        this.interests= new LinkedHashMap<>((Map) map.get("interests"));
         this.merge_fields= new LinkedHashMap<> ((Map) map.get("merge_fields"));
     }
 

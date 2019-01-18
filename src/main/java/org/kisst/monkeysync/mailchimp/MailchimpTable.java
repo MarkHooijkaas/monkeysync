@@ -13,13 +13,15 @@ import java.util.Map;
 public class MailchimpTable extends BaseTable<MailchimpRecord> implements MailchimpConnector.MemberInserter {
     private final MailchimpConnector connector;
     public boolean updatesAllowed=false;
-    private int maxsize;
     private final String necessaryInterest;
+    private final int offset;
+    private final int maxsize;
 
     public MailchimpTable(Props props) {
         super(props);
         this.connector = new MailchimpConnector(props);
-        this.maxsize= props.getInt("maxsize", 999999); // Not too big, since there is still ssome arihtmetic done
+        this.offset= props.getInt("offset", 0); // Not too big, since there is still ssome arihtmetic done
+        this.maxsize= props.getInt("count", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
         if (this.autoFetch)
             retrieveAllMembers();
@@ -59,7 +61,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     public void retrieveAllMembers() {
         try (FileOutputStream f=new FileOutputStream("mc-log.json")) {
             out= new PrintWriter(f);
-            connector.insertAllMembers(this, 0, maxsize);
+            connector.insertAllMembers(this, offset, maxsize);
             out.close();
         }
         catch (IOException e) {throw  new RuntimeException(e); }
