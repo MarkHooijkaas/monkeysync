@@ -29,7 +29,10 @@ public class Script {
     }
 
     public void parse(String line) {
-        String[] parts = line.trim().split("\\s+");
+        line=line.trim();
+        if (line.length()==0 || line.startsWith("#"))
+            return;
+        String[] parts = line.split("\\s+");
         for (int i=0; i<parts.length; i++) {
             if (parseOption(parts,i))
                 parts[i] = "";
@@ -81,6 +84,8 @@ public class Script {
             new Syncer().deleteInactiveRecords(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("syncDeleteMissing".equals(cmd))
             new Syncer().deleteMissingRecords(Env.getTable(parts[1]),Env.getTable(parts[2]));
+        else if ("run".equals(cmd))
+            new Script(Paths.get(parts[1])).run();
         else if ("echo".equals(cmd)) {
             parts[0]="";
             System.out.println(String.join(" ",parts));
@@ -97,13 +102,15 @@ public class Script {
     }
     private void showHelp() {
         System.out.println(
-                "Usage: monkeysync <command> [<arg>|<option>]*\n" +
-                "  -c, --config=<configFile>\n" +
-                "                       The config file.\n" +
-                "  -h, --help           Show this help message and exit.\n" +
+                "Usage: java -jar monkeysync-all-<version>.jar <command> [<arg>|<option>]*\n" +
+                "  -c, --config <file>  load a config file.\n" +
+                "  -h, --help           show this help message and exit.\n" +
                 "  -a, --ask            if set will ask before each update.\n" +
                 "  -v, --verbose        if set, will output details.\n" +
-                "  -V, --version        Print version information and exit.\n" +
+                "  -q, --quiet          if set, no output will be printed.\n" +
+                "  -V, --version        print version information and exit.\n" +
+                "  echo ....            echoes text to the console\n" +
+                "  run <file>           run a script from a file\n" +
                 "  load <name> <file>   load a table from <file> and name it <name>\n" +
                 "  save <name> <file>   save a table with <name> to <file> \n" +
                 "  sync <name1> <name2> sync table <name1> to table <name2>\n" +
