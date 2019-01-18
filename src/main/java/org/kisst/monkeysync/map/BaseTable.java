@@ -67,7 +67,8 @@ public abstract class BaseTable<R extends Record> implements Table {
             while ((line = br.readLine()) != null) {
                 //System.out.println(line);
                 if (line.trim().length() > 0) {
-                    create(createRecord(line));
+                    R rec = createRecord(line);
+                    records.put(rec.getKey(), rec);
                 }
             }
         }

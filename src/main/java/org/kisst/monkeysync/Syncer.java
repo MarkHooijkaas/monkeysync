@@ -14,16 +14,15 @@ public class Syncer {
      * Note: if the destination record has any fields that are not know in the source record they are ignored (they are not deleted)
      */
     public void syncAll(Table srcTable, Table destTable) {
-        createNewRecords(srcTable,destTable);
-
         updateRecords(srcTable,destTable);
+        createNewRecords(srcTable,destTable);
         deleteInactiveRecords(srcTable,destTable);
-
         if (enableDeleteMissingRecords)
             deleteMissingRecords(srcTable,destTable);
     }
 
     public int createNewRecords(Table srcTable, Table destTable) {
+        Env.info("* Creating", "");
         int count=0;
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
@@ -33,18 +32,24 @@ public class Syncer {
                 count++;
             }
         }
-        Env.info("created :", ""+count);
+        Env.info("   created :", ""+count);
         return count;
     }
 
     public int updateRecords(Table srcTable, Table destTable) {
+        Env.info("* Updating ", "");
         int count=0;
         int identical=0;
         int blocked=0;
+        int missing=0;
         LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
             Record dest=destTable.getRecord(key);
+            if (dest==null) {
+                missing++;
+                continue;
+            }
             if (destTable.mayUpdateRecord(key)) {
                 diffs.clear();
                 for (String fieldName: src.fieldNames()) {
@@ -68,14 +73,16 @@ public class Syncer {
             else
                 blocked++;
         }
-        Env.info("updated:", ""+count);
-        Env.info("identical: ",""+identical);
-        Env.info("blocked for updating: ",""+blocked);
+        Env.info("   updated:", ""+count);
+        Env.info("   identical: ",""+identical);
+        Env.info("   not found in destination: ",""+missing);
+        Env.info("   blocked for updating: ",""+blocked);
         return count;
     }
 
 
     public int deleteInactiveRecords(Table srcTable, Table destTable) {
+        Env.info("* Deleting inactive", "");
         int count = 0;
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
@@ -85,10 +92,11 @@ public class Syncer {
                 count++;
             }
         }
-        Env.info("deleted because marked deleted in source:", ""+count);
+        Env.info("   deleted because marked deleted in source:", ""+count);
         return count;
     }
     public int deleteMissingRecords(Table srcTable, Table destTable) {
+        Env.info("* Deleting missing", "");
         int count=0;
         if (false) {
             for (Record dest : destTable.records()) {
@@ -101,7 +109,7 @@ public class Syncer {
                 }
             }
         }
-        Env.info("deleted because missing in source:", ""+count);
+        Env.info("   deleted because missing in source:", ""+count);
         return count;
     }
 }

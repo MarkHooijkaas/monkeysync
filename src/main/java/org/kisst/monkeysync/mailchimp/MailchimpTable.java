@@ -76,7 +76,9 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         //LinkedHashMap<String, String> map = gson.fromJson(json, LinkedHashMap.class);
         return new MailchimpRecord(json);
     }
-    @Override protected MailchimpRecord createRecord(Record rec) { return new MailchimpRecord(rec, necessaryInterest);}
+    @Override protected MailchimpRecord createRecord(Record rec) {
+        return new MailchimpRecord(rec, necessaryInterest);
+    }
 
 
 
