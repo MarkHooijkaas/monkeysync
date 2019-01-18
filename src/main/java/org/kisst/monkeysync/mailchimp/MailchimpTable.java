@@ -18,14 +18,11 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     private final String necessaryInterest;
 
     public MailchimpTable(Props props) {
-        super(new LinkedHashMap<>());
+        super(props);
         this.connector = new MailchimpConnector(props);
         this.maxsize= props.getInt("maxsize", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
-        String file=props.getString("file", null);
-        if (file!=null)
-            System.out.println("Loading from file: "+file);
-        else if (props.getBoolean("autoload", false))
+        if (this.autoFetch)
             retrieveAllMembers();
     }
 

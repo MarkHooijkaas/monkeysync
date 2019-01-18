@@ -2,6 +2,7 @@ package org.kisst.monkeysync.map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.Table;
 
@@ -9,16 +10,22 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class BaseTable<R extends Record> implements Table {
-    protected final LinkedHashMap<String, R> records;
+    protected final LinkedHashMap<String, R> records=new LinkedHashMap<>();
+    protected final String file;
+    protected final boolean autoFetch;
 
 
-    public BaseTable(LinkedHashMap<String, R> records) {
-        this.records=records;
+    public BaseTable(Props props) {
+        this.file = props.getString("file",null);
+        if (file!=null)
+            load(Paths.get(file));
+        this.autoFetch = props.getBoolean("autoFetch",file==null);
     }
 
     @Override public boolean recordExists(String key)  { return records.containsKey(key);}
@@ -52,7 +59,7 @@ public abstract class BaseTable<R extends Record> implements Table {
 
     protected final static Gson gson = new Gson();
 
-    public void readJsonFile(Path p) {
+    public void load(Path p) {
         try {
             Files.lines(p).forEach(line ->{
                 if (line.trim().length()>0) {
@@ -63,7 +70,7 @@ public abstract class BaseTable<R extends Record> implements Table {
         catch (IOException e) { throw new RuntimeException(e);}
     }
 
-    public void writeJsonFile(String filename) {
+    public void save(String filename) {
         try (FileWriter file = new FileWriter(filename)) {
             Gson gson = new GsonBuilder().create();
             for (Record rec: records.values()) {

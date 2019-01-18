@@ -55,7 +55,7 @@ public class Env {
         Props dbprops=props.getProps(name);
         String type=dbprops.getString("type");
         if ("SqlTable".equals(type))
-            return new SqlTable(Env.props,name);
+            return new SqlTable(dbprops);
         if ("MailchimpTable".equals(type))
             return new MailchimpTable(dbprops);
         if ("MapTable".equals(type))

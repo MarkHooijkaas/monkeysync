@@ -19,5 +19,5 @@ public interface Table {
     void update(Record destrec, Map<String, String> diffs);
     void delete(Record destrec);
 
-    void writeJsonFile(String filename);
+    void save(String filename);
 }

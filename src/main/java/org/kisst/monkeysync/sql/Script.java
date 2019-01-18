@@ -37,7 +37,7 @@ public class Script {
             if (parseOption(parts,i))
                 parts[i] = "";
         }
-        Env.info("running ",line.trim());
+        Env.verbose("running ",line.trim());
        // optons might be removed from the parts so reassemble the parts
         line=String.join(" ",parts);
         parts=line.trim().split("\\s+");
@@ -73,7 +73,7 @@ public class Script {
         if ("load".equals(cmd))
             Env.loadTable(parts[1], parts[2]);
         else if ("save".equals(cmd))
-            Env.getTable(parts[1]).writeJsonFile(parts[2]);
+            Env.getTable(parts[1]).save(parts[2]);
         else if ("sync".equals(cmd))
             new Syncer().syncAll(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("syncCreate".equals(cmd))

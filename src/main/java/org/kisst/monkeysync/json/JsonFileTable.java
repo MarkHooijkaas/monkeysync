@@ -15,7 +15,7 @@ public class JsonFileTable extends MapTable {
 
     public JsonFileTable(Path path, Props props) {
         this.path= path;
-        readJsonFile(path);
+        load(path);
     }
 
 }

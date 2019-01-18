@@ -1,5 +1,6 @@
 package org.kisst.monkeysync.sql;
 
+import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.map.MapRecord;
 import org.kisst.monkeysync.map.MapTable;
@@ -14,11 +15,16 @@ import java.util.LinkedHashMap;
 
 public class SqlTable extends MapTable {
 
-    public SqlTable(Props globalprops, String propkey) {
-        Props props=globalprops.getProps(propkey);
+    public SqlTable(Props props) {
+        super(props);
+        if (this.autoFetch)
+            query(props);
+    }
+
+    public void query(Props props) {
         Props dbprops=props;
         if (props.getString("db",null)!=null)
-            dbprops=globalprops.getProps(props.getString("db"));
+            dbprops= Env.props.getProps(props.getString("db"));
 
         String ignoreColumnsList=props.getString("ignoreColumns",null);
         HashSet<String> ignoreColumns=new HashSet<>();

@@ -1,14 +1,13 @@
 package org.kisst.monkeysync.map;
 
+import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 
 import java.util.LinkedHashMap;
 
 public class MapTable extends BaseTable<MapRecord> {
-    private final LinkedHashMap<String, Record> records = new LinkedHashMap<>();
-
-    public MapTable() {
-        super(new LinkedHashMap<>());
+    public MapTable(Props props) {
+        super(props);
     }
 
     @Override protected MapRecord createRecord(String json) {
