@@ -18,4 +18,6 @@ public interface Table {
     void create(Record srcrec);
     void update(Record destrec, Map<String, String> diffs);
     void delete(Record destrec);
+
+    void writeJsonFile(String filename);
 }

@@ -72,8 +72,8 @@ public class Script {
         String cmd=parts[0].trim();
         if ("load".equals(cmd))
             Env.loadTable(parts[1], parts[2]);
-        //else if ("save".equals(cmd))
-        //    Env.getTable(parts[1]);
+        else if ("save".equals(cmd))
+            Env.getTable(parts[1]).writeJsonFile(parts[2]);
         else if ("sync".equals(cmd))
             new Syncer().syncAll(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("syncCreate".equals(cmd))

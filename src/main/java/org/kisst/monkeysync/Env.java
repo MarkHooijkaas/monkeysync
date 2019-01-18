@@ -45,22 +45,23 @@ public class Env {
     static public Table getTable(String name) {
         if (tables.get(name)==null) {
             verbose("Loading table ",name);
-            tables.put(name, loadTable(props.getProps(name)));
+            tables.put(name, loadTable(name));
             info("Loaded "+tables.get(name).size()+" records from ", name);
         }
         return tables.get(name);
     }
 
-    static private Table loadTable(Props props) {
-        String type=props.getString("type");
+    static private Table loadTable(String name) {
+        Props dbprops=props.getProps(name);
+        String type=dbprops.getString("type");
         if ("SqlTable".equals(type))
-            return new SqlTable(props,"");
+            return new SqlTable(Env.props,name);
         if ("MailchimpTable".equals(type))
-            return new MailchimpTable(props);
+            return new MailchimpTable(dbprops);
         if ("MapTable".equals(type))
             return new MapTable();
         if ("JsonFileTable".equals(type))
-            return new JsonFileTable(props);
+            return new JsonFileTable(dbprops);
         throw new RuntimeException("Unknow table type "+type);
     }
 
