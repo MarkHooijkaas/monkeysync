@@ -115,7 +115,10 @@ run subscript.txt
 ```
 
 ## TODO
-- logging
+- fix/improve the load and save functions
+- logging using slf4j for debugging mainly
+- --dry-run possibilty
+- using ${var} from in config and/or scripts (if useful usecase exists)
 - more efficient memory handling
 - new table types (e.g, CSV file, SQL destination, ...)
 - tables with other fields than Strings (e.g. nested strutures)
