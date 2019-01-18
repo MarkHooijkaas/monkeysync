@@ -59,7 +59,7 @@ public class Env {
             return new MailchimpTable(tblprops);
         if ("MapTable".equals(type))
             return new MapTable(tblprops);
-        throw new RuntimeException("Unknow table type "+type);
+        throw new RuntimeException("Unknown table type "+type);
     }
 
 }

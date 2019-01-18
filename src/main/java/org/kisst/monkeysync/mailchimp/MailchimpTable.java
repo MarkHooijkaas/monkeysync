@@ -8,7 +8,6 @@ import org.kisst.monkeysync.map.BaseTable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MailchimpTable extends BaseTable<MailchimpRecord> implements MailchimpConnector.MemberInserter {
@@ -81,16 +80,19 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
 
     @Override public void create(Record srcrec) {
+        super.create(srcrec);
         if (updatesAllowed)
             connector.createMember(srcrec.getKey(), JsonHelper.toJson(srcrec));
     }
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
+        super.update(destrec, diffs);
         if (updatesAllowed)
             connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs));
     }
 
     @Override public void delete(Record destrec) {
+        super.delete(destrec);
         if (updatesAllowed)
             connector.unsubscribeMember(destrec.getKey());
     }

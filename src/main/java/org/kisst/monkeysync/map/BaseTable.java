@@ -6,6 +6,8 @@ import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.Table;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,12 +62,14 @@ public abstract class BaseTable<R extends Record> implements Table {
     protected final static Gson gson = new Gson();
 
     public void load(Path p) {
-        try {
-            Files.lines(p).forEach(line ->{
-                if (line.trim().length()>0) {
+        try (BufferedReader br = new BufferedReader(new FileReader(p.toString()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                //System.out.println(line);
+                if (line.trim().length() > 0) {
                     create(createRecord(line));
                 }
-            });
+            }
         }
         catch (IOException e) { throw new RuntimeException(e);}
     }

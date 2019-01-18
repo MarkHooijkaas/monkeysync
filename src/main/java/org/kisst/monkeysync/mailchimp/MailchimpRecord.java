@@ -3,6 +3,7 @@ package org.kisst.monkeysync.mailchimp;
 import com.google.gson.Gson;
 import org.kisst.monkeysync.Record;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MailchimpRecord implements Record {
     private static final Gson gson = new Gson();
@@ -29,7 +30,7 @@ public class MailchimpRecord implements Record {
         this.email_address= (String) map.get("email_address");
         this.status = (String) map.get("status");
         this.interests= (LinkedHashMap<String, Boolean>) map.get("interests");
-        this.merge_fields= (LinkedHashMap<String, String>) map.get("merge_fields");
+        this.merge_fields= new LinkedHashMap<> ((Map) map.get("merge_fields"));
     }
 
     @Override public String toJson() { return gson.toJson(this, MailchimpRecord.class); }
