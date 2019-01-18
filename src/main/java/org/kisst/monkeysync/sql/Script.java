@@ -103,12 +103,13 @@ public class Script {
     private void showHelp() {
         System.out.println(
                 "Usage: java -jar monkeysync-all-<version>.jar <command> [<arg>|<option>]*\n" +
-                "  -c, --config <file>  load a config file.\n" +
-                "  -h, --help           show this help message and exit.\n" +
-                "  -a, --ask            if set will ask before each update.\n" +
-                "  -v, --verbose        if set, will output details.\n" +
-                "  -q, --quiet          if set, no output will be printed.\n" +
-                "  -V, --version        print version information and exit.\n" +
+                "  -c, --config <file>  load a config file (multiple files are allowed)\n" +
+                "  -h, --help           show this help message and exit\n" +
+                "  -a, --ask            if set will ask before each update\n" +
+                "  -v, --verbose        if set, will output details\n" +
+                "  -q, --quiet          if set, no output will be printed\n" +
+                "  -V, --version        print version information and exit\n" +
+                "  --<prop>=<value>     set/override any property from the loaded configuration\n" +
                 "  echo ....            echoes text to the console\n" +
                 "  run <file>           run a script from a file\n" +
                 "  load <name> <file>   load a table from <file> and name it <name>\n" +
