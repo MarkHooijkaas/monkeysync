@@ -22,6 +22,7 @@ Usage: java -jar monkeysync-all-<version>.jar <command> [<arg>|<option>]*
   -h, --help           Show this help message and exit.
   -a, --ask            if set will ask before each update.
   -v, --verbose        if set, will output details.
+  -q, --quiet          if set, no output will be generated
   -V, --version        Print version information and exit.
   echo ....            echoes text to the console
   run <file>           run a script from a file
@@ -113,9 +114,25 @@ syncDeleteMissing --ask db2 mailchimp
 echo do some other stuff
 run subscript.txt
 ```
+## Building and embedding
+Building the jar file is performed using gradle. 
+The gradle wrapper is included, so gradled does not need to be installed on your system.
+On Unix you can build the fatJar as follows:
+```
+./gradlew fatJar
+```
+On Windows this is almost similar
+```
+gradlew.bat fatJar
+```
+The fatJar provides all dependencies and generates a jar file with -all- in it's name.
+
+It is also possible to build a smaller jar, with just the monkeysync code itself, for embedding in other projects.
+For this one can use the regular jar task in gradle.
 
 ## TODO
 - fix/improve the load and save functions
+- more documentation
 - logging using slf4j for debugging mainly
 - --dry-run possibilty
 - using ${var} from in config and/or scripts (if useful usecase exists)
