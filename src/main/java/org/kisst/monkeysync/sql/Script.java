@@ -37,7 +37,7 @@ public class Script {
             if (parseOption(parts,i))
                 parts[i] = "";
         }
-        Env.verbose("running ",line.trim());
+        Env.info("*** ",line.trim());
        // optons might be removed from the parts so reassemble the parts
         line=String.join(" ",parts);
         parts=line.trim().split("\\s+");

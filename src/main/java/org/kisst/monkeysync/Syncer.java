@@ -14,19 +14,13 @@ public class Syncer {
      * Note: if the destination record has any fields that are not know in the source record they are ignored (they are not deleted)
      */
     public void syncAll(Table srcTable, Table destTable) {
-        int count=createNewRecords(srcTable,destTable);
-        Env.info("created :", ""+count);
+        createNewRecords(srcTable,destTable);
 
-        count=updateRecords(srcTable,destTable);
-        Env.info("updated:", ""+count);
+        updateRecords(srcTable,destTable);
+        deleteInactiveRecords(srcTable,destTable);
 
-        count=deleteInactiveRecords(srcTable,destTable);
-        Env.info("deleted :", ""+count);
-
-        if (enableDeleteMissingRecords) {
-            count=deleteMissingRecords(srcTable,destTable);
-            Env.info("deleted missing records:", ""+count);
-        }
+        if (enableDeleteMissingRecords)
+            deleteMissingRecords(srcTable,destTable);
     }
 
     public int createNewRecords(Table srcTable, Table destTable) {
@@ -39,12 +33,14 @@ public class Syncer {
                 count++;
             }
         }
+        Env.info("created :", ""+count);
         return count;
     }
 
     public int updateRecords(Table srcTable, Table destTable) {
         int count=0;
         int identical=0;
+        int blocked=0;
         LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
@@ -69,8 +65,12 @@ public class Syncer {
                     identical++;
                 }
             }
+            else
+                blocked++;
         }
-        Env.debug("Total identical: ",""+identical);
+        Env.info("updated:", ""+count);
+        Env.info("identical: ",""+identical);
+        Env.info("blocked for updating: ",""+blocked);
         return count;
     }
 
@@ -85,6 +85,7 @@ public class Syncer {
                 count++;
             }
         }
+        Env.info("deleted because marked deleted in source:", ""+count);
         return count;
     }
     public int deleteMissingRecords(Table srcTable, Table destTable) {
@@ -100,6 +101,7 @@ public class Syncer {
                 }
             }
         }
+        Env.info("deleted because missing in source:", ""+count);
         return count;
     }
 }
