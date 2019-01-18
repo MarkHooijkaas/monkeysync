@@ -22,7 +22,10 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         this.connector = new MailchimpConnector(props);
         this.maxsize= props.getInt("maxsize", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
-        if (props.getBoolean("autoload", true))
+        String file=props.getString("file", null);
+        if (file!=null)
+            System.out.println("Loading from file: "+file);
+        else if (props.getBoolean("autoload", false))
             retrieveAllMembers();
     }
 
