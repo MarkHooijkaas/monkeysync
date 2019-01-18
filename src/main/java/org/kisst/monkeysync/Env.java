@@ -5,6 +5,8 @@ import org.kisst.monkeysync.mailchimp.MailchimpTable;
 import org.kisst.monkeysync.map.MapTable;
 import org.kisst.monkeysync.sql.SqlTable;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 
 public class Env {
@@ -14,6 +16,10 @@ public class Env {
     static public boolean interactive=false;
     static public boolean enableDeleteMissingRecords =false;
 
+    static public void loadProps(Path p) {
+        info("loading props from: ",p.toString());
+        props.loadProps(p);
+    }
 
     static public void info(String s, String key) {
         if (verbosity>=1)
@@ -56,5 +62,10 @@ public class Env {
         if ("JsonFileTable".equals(type))
             return new JsonFileTable(props);
         throw new RuntimeException("Unknow table type "+type);
+    }
+
+    public static void loadTable(String name, String filename) {
+        JsonFileTable table=new JsonFileTable(Paths.get(props.getString("path")), props.getProps(name));
+        tables.put(name, table);
     }
 }

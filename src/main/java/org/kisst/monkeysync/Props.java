@@ -3,6 +3,7 @@ package org.kisst.monkeysync;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
@@ -65,13 +66,22 @@ public class Props {
         return result.toString();
     }
 
-    public void loadProps(File path) {
+    public void loadProps(Path path) {
         try {
-            Properties props = new Properties();
-            props.load(new FileReader(path));
-            for (Object key: props.keySet())
-                this.props.put((String) key, props.getProperty((String)key));
+            Properties p = new Properties();
+            p.load(new FileReader(path.toFile()));
+            for (Object key: p.keySet())
+                this.props.put((String) key, p.getProperty((String)key));
         }
         catch (IOException e) { throw new RuntimeException(e);}
+    }
+
+    public void parseLine(String line) {
+        int pos=line.indexOf("=");
+        if (pos>0) {
+            String key=line.substring(0,pos);
+            String value=line.substring(pos+1);
+            props.put(key,value);
+        }
     }
 }

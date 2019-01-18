@@ -10,7 +10,11 @@ public class JsonFileTable extends MapTable {
     private final Path path;
 
     public JsonFileTable(Props props) {
-        this.path= Paths.get(props.getString("path"));
+        this(Paths.get(props.getString("path")), props);
+    }
+
+    public JsonFileTable(Path path, Props props) {
+        this.path= path;
         readJsonFile(path);
     }
 
