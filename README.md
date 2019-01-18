@@ -77,11 +77,41 @@ Once a table is loaded/retrieved, it will stay in memory for use in other comman
 
 
 ## Configuration
+The configuration is by default loaded from a file named monkeysync.props.
+You can specify another file using the -c or --config flag.
+In fact you can use that flag multiple times, to load multiple config files.
+
+Most important in the configuration is the definition of tables.
+Each table has a symbolic name, that is the start of it's configuration properties.
+The most important property is the type, to define what kind of table it is.
 
 ## Complex scripts
-
+You can use more complex scenario's with the scripting example.
+One situation would be where one would want to merge multiple tables into mailchimp.
+The advantage of doing this is one script is that the mailchimp records only need to b retrieved once.
+This is a fairly heavy operation (37.000 records took about 15 minutes), so should be avoiden to do twice
+There are two ways to do this:
 ```
-monkeysync run script
+monkeysync sync db1 mailchimp, sync db2 mailchimp
+```
+or
+```
+monkeysync sync db1 db2, sync db2 mailchimp
+```
+If scripts get even more complicated, you can put a script in a separate file, instead of on the commandline.
+This script can then be called using the following syntax
+```
+monkeysync run script.txt
+```
+A script is basically the same as the commandline, but with newlines instead of comma's 
+```
+echo Updating records that have different fields in db1
+syncUpdate db1 mailchimp
+echo deleting records that are not in db2 and ask for confirmaion for each record
+syncDeleteMissing --ask db2 mailchimp
+
+echo do some other stuff
+run subscript.txt
 ```
 
 ## TODO
