@@ -1,6 +1,5 @@
 package org.kisst.monkeysync;
 
-import org.kisst.monkeysync.json.JsonFileTable;
 import org.kisst.monkeysync.mailchimp.MailchimpTable;
 import org.kisst.monkeysync.map.MapTable;
 import org.kisst.monkeysync.sql.SqlTable;
@@ -52,21 +51,15 @@ public class Env {
     }
 
     static private Table loadTable(String name) {
-        Props dbprops=props.getProps(name);
-        String type=dbprops.getString("type");
+        Props tblprops=props.getProps(name);
+        String type=tblprops.getString("type");
         if ("SqlTable".equals(type))
-            return new SqlTable(dbprops);
+            return new SqlTable(tblprops);
         if ("MailchimpTable".equals(type))
-            return new MailchimpTable(dbprops);
+            return new MailchimpTable(tblprops);
         if ("MapTable".equals(type))
-            return new MapTable();
-        if ("JsonFileTable".equals(type))
-            return new JsonFileTable(dbprops);
+            return new MapTable(tblprops);
         throw new RuntimeException("Unknow table type "+type);
     }
 
-    public static void loadTable(String name, String filename) {
-        JsonFileTable table=new JsonFileTable(Paths.get(props.getString("path")), props.getProps(name));
-        tables.put(name, table);
-    }
 }
