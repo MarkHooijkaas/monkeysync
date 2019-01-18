@@ -1,9 +1,19 @@
 package org.kisst.monkeysync;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public class Syncer {
     private boolean enableDeleteMissingRecords =false;
+    private final HashSet<String> ignoreFields=new HashSet<>();
+
+    public Syncer(){
+        // TODO: pass props
+        String str=Env.props.getString("sync.ignoreFields",null);
+        if (str!=null)
+            for (String field : str.split(","))
+                ignoreFields.add(field.trim());
+    }
 
     /**
      * This method will sync all records from the source into the destination.
@@ -53,6 +63,8 @@ public class Syncer {
             if (destTable.mayUpdateRecord(key)) {
                 diffs.clear();
                 for (String fieldName: src.fieldNames()) {
+                    if (ignoreFields.contains(fieldName))
+                        continue;
                     String value=src.getField(fieldName);
                     if (value==null)
                         continue;
@@ -62,7 +74,7 @@ public class Syncer {
                 // System.out.println(diffs.size()+" for "+dest.getKey());
                 if (diffs.size()>0) {
                     destTable.update(dest, diffs);
-                    Env.verbose("merging: ",key);
+                    Env.verbose("merging: ",key+diffs);
                     count++;
                 }
                 else {
