@@ -71,7 +71,7 @@ public class Props {
             Properties p = new Properties();
             p.load(new FileReader(path.toFile()));
             for (Object key: p.keySet())
-                this.props.put((String) key, p.getProperty((String)key));
+                this.props.put((String) key, substitute(p.getProperty((String)key)));
         }
         catch (IOException e) { throw new RuntimeException(e);}
     }
@@ -83,5 +83,29 @@ public class Props {
             String value=line.substring(pos+1);
             props.put(key,value);
         }
+    }
+    public void clearProp(String name) { props.remove(name); }
+
+    public String substitute(String str) {
+        StringBuilder result = new StringBuilder();
+        int prevpos=0;
+        int pos=str.indexOf("${");
+        while (pos>=0) {
+            int pos2=str.indexOf("}", pos);
+            if (pos2<0)
+                throw new RuntimeException("Unbounded ${ starting with "+str.substring(pos,pos+10));
+            String key=str.substring(pos+2,pos2);
+            result.append(str.substring(prevpos,pos));
+            String value=this.getString(key,null);
+            if (value==null && key.equals("dollar"))
+                value="$";
+            if (value==null)
+                throw new RuntimeException("Unknown variable ${"+key+"}");
+            result.append(value.toString());
+            prevpos=pos2+1;
+            pos=str.indexOf("${",prevpos);
+        }
+        result.append(str.substring(prevpos));
+        return result.toString();
     }
 }

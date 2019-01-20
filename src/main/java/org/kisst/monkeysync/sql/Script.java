@@ -73,6 +73,8 @@ public class Script {
 
 
     private void parseCommands(String[] parts) {
+        for (int i=0; i<parts.length; i++)
+            parts[i]=substitute(parts[i]);
         String cmd=parts[0].trim();
         if ("save".equals(cmd))
             Env.getTable(parts[1]).save(parts[2]);
@@ -90,12 +92,13 @@ public class Script {
             new Script(Paths.get(parts[1])).run();
         else if ("echo".equals(cmd)) {
             parts[0]="";
-            System.out.println(String.join(" ",parts));
+            System.out.println(Env.props.substitute(String.join(" ",parts)));
         }
         else
             throw new RuntimeException("Unknown command "+cmd);
 
     }
+    private String substitute(String str) {return Env.props.substitute(str);}
 
     private void showVersion() {
         System.out.println("monkeysync version 0.1");
