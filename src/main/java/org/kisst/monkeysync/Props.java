@@ -99,6 +99,8 @@ public class Props {
             String value=this.getString(key,null);
             if (value==null && key.equals("dollar"))
                 value="$";
+            if (value==null && key.startsWith("env."))
+                value=System.getenv(key.substring(4));
             if (value==null)
                 throw new RuntimeException("Unknown variable ${"+key+"}");
             result.append(value.toString());
