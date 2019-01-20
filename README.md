@@ -131,12 +131,13 @@ It is also possible to build a smaller jar, with just the monkeysync code itself
 For this one can use the regular jar task in gradle.
 
 ## TODO
-- fix/improve the load and save functions
 - more documentation
 - logging using slf4j for debugging mainly
 - --dry-run possibilty
-- using ${var} from in config and/or scripts (if useful usecase exists)
+- test the --ask flag
 - more efficient memory handling
 - new table types (e.g, CSV file, SQL destination, ...)
 - tables with other fields than Strings (e.g. nested strutures)
+- streaming (ordered) data source and destination, to handle larger than memory datasets
+- --limit flag to don't retrieve an entire dataset
 - ...
