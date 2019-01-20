@@ -60,6 +60,10 @@ public class Script {
             Env.loadProps(Paths.get(parts[i+1]));
             parts[i+1]="";
         }
+        else if ("-n".equals(option) || "--null".equals(option) || "--no".equals(option) ) {
+            Env.props.clearProp((parts[i+1]));
+            parts[i+1]="";
+        }
         else if (option.startsWith("--") && option.indexOf("=")>0)
             Env.props.parseLine(option.substring(2));
         else
@@ -100,13 +104,14 @@ public class Script {
     }
     private void showHelp() {
         System.out.println(
-                "Usage: java -jar monkeysync-all-<version>.jar <command> [<arg>|<option>]*\n" +
+                "Usage: monkeysync <command> [<arg>|<option>]*\n" +
                 "  -c, --config <file>  load a config file (multiple files are allowed)\n" +
                 "  -h, --help           show this help message and exit\n" +
                 "  -a, --ask            if set will ask before each update\n" +
                 "  -v, --verbose        if set, will output details\n" +
                 "  -q, --quiet          if set, no output will be printed\n" +
                 "  -V, --version        print version information and exit\n" +
+                "  -n, --no --null      clear a property set in the configuration\n" +
                 "  --<prop>=<value>     set/override any property from the loaded configuration\n" +
                 "  echo ....            echoes text to the console\n" +
                 "  run <file>           run a script from a file\n" +
