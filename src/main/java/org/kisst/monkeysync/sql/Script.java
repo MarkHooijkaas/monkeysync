@@ -101,7 +101,7 @@ public class Script {
     private String substitute(String str) {return Env.props.substitute(str);}
 
     private void showVersion() {
-        System.out.println("monkeysync version 0.1");
+        System.out.println("monkeysync version 1.0");
         System.exit(0);
 
     }
