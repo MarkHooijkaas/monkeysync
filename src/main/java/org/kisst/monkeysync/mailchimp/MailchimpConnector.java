@@ -44,6 +44,8 @@ public class MailchimpConnector {
     }
 
 
+    public boolean isDryRun() { return Env.props.getBoolean("mailchimp.dryrun",true); }
+
     public String call(String method, String urlpart, String data) {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, data);
@@ -58,26 +60,36 @@ public class MailchimpConnector {
         } catch (IOException e) { throw new RuntimeException(e);}
     }
 
-    public void createMember(String email, String fields) {
+    public void createMember(String email, String fields, String necessaryInterest) {
         JsonBuilder json=new JsonBuilder();
         json.addStringField("email_address", email);
         json.addStringField("status", "subscribed");
+        if (necessaryInterest!=null)
+            json.addUnescapedField("interests", "{'"+necessaryInterest+"':True}");
         json.addUnescapedField("merge_fields", fields);
-        post("members/", json.toString() );
+            Env.verbose("Create: "+email,fields);
+        if (! isDryRun())
+            post("members/", json.toString() );
     }
 
-    public void updateMemberFields(String email, String fields) {
+    public void updateMemberFields(String email, String fields, String necessaryInterest) {
         JsonBuilder json=new JsonBuilder();
         json.addStringField("email_address", email);
+        if (necessaryInterest!=null)
+            json.addUnescapedField("interests", "{'"+necessaryInterest+"':True}");
         json.addUnescapedField("merge_fields", fields);
-        patch(memberUrl(email), json.toString() );
+        Env.verbose("Update: "+email,fields);
+        if (! isDryRun())
+            patch(memberUrl(email), json.toString() );
     }
 
     public void unsubscribeMember(String email) {
         JsonBuilder json=new JsonBuilder();
         json.addStringField("email_address", email);
         json.addStringField("status", "unsubscribed");
-        patch(memberUrl(email), json.toString() );
+        Env.verbose("Delete: ",email);
+        if (! isDryRun())
+            patch(memberUrl(email), json.toString() );
     }
 
     public static interface MemberInserter {

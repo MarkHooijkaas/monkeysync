@@ -27,6 +27,16 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
             retrieveAllMembers();
     }
 
+
+    public boolean hasAllNecessaryInterests(MailchimpRecord rec) {
+        if (necessaryInterest!=null) {
+            Boolean b = rec.interests.get(necessaryInterest);
+            if (b==null || b==false)
+                return false;
+        }
+        return true;
+    }
+
     protected boolean mayRecordBeChanged(MailchimpRecord rec) {
         if (rec==null)
             return false;
@@ -36,30 +46,21 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
             return false;
         if ("pending".equals(rec.status))
             return false;
-        if (necessaryInterest!=null) {
-           Boolean b = rec.interests.get(necessaryInterest);
-           if (b==null || b==false)
-               return false;
-        }
         return true;
     }
 
     @Override public boolean mayDeleteRecord(String key) {
         MailchimpRecord rec = records.get(key);
-        if (! mayRecordBeChanged(rec))
-            return false;
-        return true;
+        return  mayRecordBeChanged(rec) && hasAllNecessaryInterests(rec);
     }
     @Override public boolean mayUpdateRecord(String key) {
         MailchimpRecord rec = records.get(key);
-        if (! mayRecordBeChanged(rec))
-            return false;
-        return true;
+        return mayRecordBeChanged(rec);
     }
 
-    PrintWriter out;
+    PrintWriter out; // logging file to save mailchimp retrieval if it crashes (e.g. Out of memory), and can't be saved
     public void retrieveAllMembers() {
-        try (FileOutputStream f=new FileOutputStream("mc-log.json")) {
+        try (FileOutputStream f=new FileOutputStream("mailchimp-retrieval-log.json")) {
             out= new PrintWriter(f);
             connector.insertAllMembers(this, offset, maxsize);
             out.close();
@@ -86,13 +87,17 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     @Override public void create(Record srcrec) {
         super.create(srcrec);
         if (updatesAllowed)
-            connector.createMember(srcrec.getKey(), JsonHelper.toJson(srcrec));
+            connector.createMember(srcrec.getKey(), JsonHelper.toJson(srcrec),necessaryInterest);
     }
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
         super.update(destrec, diffs);
-        if (updatesAllowed)
-            connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs));
+        if (updatesAllowed) {
+            if (hasAllNecessaryInterests((MailchimpRecord) destrec))
+                connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), null); // no reason to set necessary interest again
+            else
+                connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), necessaryInterest);
+        }
     }
 
     @Override public void delete(Record destrec) {
