@@ -24,6 +24,7 @@ public abstract class BaseTable<R extends Record> implements Table {
     private final String statusField;
     private final Set<String> statusActiveValues;
     private final Set<String> statusDeletedValues;
+    private final boolean statusCaseSensitive;
 
     public BaseTable(Props props) {
         this.file = props.getString("file",null);
@@ -31,8 +32,15 @@ public abstract class BaseTable<R extends Record> implements Table {
             load(Paths.get(file));
         this.autoFetch = props.getBoolean("autoFetch",file==null);
         this.statusField =props.getString("statusField",null);
+        this.statusCaseSensitive =props.getBoolean("statusField",true);
         this.statusActiveValues=props.getStringSet("statusActiveValues");
         this.statusDeletedValues=props.getStringSet("statusDeletedValues");
+        if (! statusCaseSensitive) {
+            for(String s: statusDeletedValues)
+                statusDeletedValues.add(s.toUpperCase());
+            for(String s: statusActiveValues)
+                statusActiveValues.add(s.toUpperCase());
+        }
     }
 
 
@@ -43,7 +51,10 @@ public abstract class BaseTable<R extends Record> implements Table {
             return true;
         if (rec==null)
             return false;
-        return statusActiveValues.contains(rec.getField(statusField));
+        String status=rec.getField(statusField);
+        if (status!=null && statusCaseSensitive)
+            status=status.toUpperCase();
+        return statusActiveValues.contains(status);
     }
 
     @Override public boolean isDeleteDesired(Record rec) {
@@ -51,7 +62,10 @@ public abstract class BaseTable<R extends Record> implements Table {
             return false;
         if (rec==null)
             return false;
-        return statusDeletedValues.contains(rec.getField(statusField));
+        String status=rec.getField(statusField);
+        if (status!=null && statusCaseSensitive)
+            status=status.toUpperCase();
+        return statusDeletedValues.contains(status);
     }
     @Override public boolean mayDeleteRecord(String key) { return isActive(getRecord(key)); }
     @Override public boolean mayUpdateRecord(String key) { return isActive(getRecord(key)); }
