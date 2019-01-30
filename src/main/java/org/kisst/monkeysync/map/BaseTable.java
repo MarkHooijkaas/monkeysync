@@ -10,10 +10,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,17 +21,33 @@ public abstract class BaseTable<R extends Record> implements Table {
     protected final LinkedHashMap<String, R> records=new LinkedHashMap<>();
     protected final String file;
     protected final boolean autoFetch;
-
+    private final String deleteWhenField;
+    private final HashSet<String> deleteWhenValues=new HashSet<>();
 
     public BaseTable(Props props) {
         this.file = props.getString("file",null);
         if (file!=null)
             load(Paths.get(file));
         this.autoFetch = props.getBoolean("autoFetch",file==null);
+        this.deleteWhenField=props.getString("deleteWhenField",null);
+        if (deleteWhenField!=null) {
+            String values=props.getString("deleteWhenValues");
+            String[] list=values.split(",");
+            for (String value : list)
+                deleteWhenValues.add(values.trim());
+        }
+
     }
 
     @Override public boolean recordExists(String key)  { return records.containsKey(key);}
-    @Override public boolean isDeleteDesired(String key) { return false; }
+    @Override public boolean isDeleteDesired(String key) {
+        if (deleteWhenField==null)
+            return false;
+        Record rec = getRecord(key);
+        if (rec==null)
+            return false;
+        return deleteWhenValues.contains(rec.getField(deleteWhenField));
+    }
     @Override public boolean mayDeleteRecord(String key) { return recordExists(key); }
     @Override public boolean mayUpdateRecord(String key) { return recordExists(key); }
     @Override public boolean mayCreateRecord(String key) { return ! recordExists(key); }
