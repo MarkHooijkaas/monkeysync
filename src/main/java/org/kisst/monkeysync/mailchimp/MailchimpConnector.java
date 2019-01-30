@@ -27,6 +27,7 @@ public class MailchimpConnector {
     }
 
 
+    public void put(String urlpart, String data) {call("PUT", urlpart, data);}
     public void post(String urlpart, String data) {call("POST", urlpart, data);}
     public void patch(String urlpart, String data) {call("PATCH", urlpart, data);}
     public String get(String urlpart) {
@@ -89,7 +90,7 @@ public class MailchimpConnector {
         json.addStringField("status", "unsubscribed");
         Env.verbose("Delete: ",email);
         if (! isDryRun())
-            patch(memberUrl(email), json.toString() );
+            put(memberUrl(email), json.toString() );
     }
 
     public static interface MemberInserter {

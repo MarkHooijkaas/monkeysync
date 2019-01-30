@@ -33,9 +33,8 @@ public class Env {
             System.out.println(s+key);
     }
     static public boolean ask(String s) {
-        if (interactive || verbosity>=1)
-            System.out.println(s);
         if (interactive) {
+            System.out.println(s);
             String line=System.console().readLine();
             if (line.trim().toLowerCase().startsWith("n"))
                 return false;
