@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Properties;
+import java.util.Set;
 
 public class Props {
     private final LinkedHashMap<String,String> props=new LinkedHashMap<>();
@@ -46,6 +48,18 @@ public class Props {
         if (result==null)
             throw new RuntimeException("Could not find int property "+key);
         return Integer.parseInt(result);
+    }
+
+
+    public Set<String> getStringSet(String name) {
+        HashSet<String> result=new HashSet<>();
+        String values=getString(name, null);
+        if (values==null)
+            return result;
+        String[] list=values.split(",");
+        for (String value : list)
+            result.add(values.trim());
+        return result;
     }
 
     public Props  getProps(String prefix) {
