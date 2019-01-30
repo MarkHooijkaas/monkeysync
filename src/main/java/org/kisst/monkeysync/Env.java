@@ -36,7 +36,9 @@ public class Env {
         if (interactive || verbosity>=1)
             System.out.println(s);
         if (interactive) {
-            System.console().readLine();
+            String line=System.console().readLine();
+            if (line.trim().toLowerCase().startsWith("n"))
+                return false;
         }
         return true;
     }
