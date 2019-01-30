@@ -98,7 +98,7 @@ public class Syncer {
         int count = 0;
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
-            if (srcTable.isDeleteDesired(key) && destTable.mayDeleteRecord(key)) {
+            if (srcTable.isDeleteDesired(src) && destTable.mayDeleteRecord(key)) {
                 destTable.delete(src);
                 Env.verbose("deleted ", src.getKey());
                 count++;

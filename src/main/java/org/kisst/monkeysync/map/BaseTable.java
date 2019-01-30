@@ -13,43 +13,48 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseTable<R extends Record> implements Table {
     protected final LinkedHashMap<String, R> records=new LinkedHashMap<>();
     protected final String file;
     protected final boolean autoFetch;
-    private final String deleteWhenField;
-    private final HashSet<String> deleteWhenValues=new HashSet<>();
+    private final String statusField;
+    private final Set<String> statusActiveValues;
+    private final Set<String> statusDeletedValues;
 
     public BaseTable(Props props) {
         this.file = props.getString("file",null);
         if (file!=null)
             load(Paths.get(file));
         this.autoFetch = props.getBoolean("autoFetch",file==null);
-        this.deleteWhenField=props.getString("deleteWhenField",null);
-        if (deleteWhenField!=null) {
-            String values=props.getString("deleteWhenValues");
-            String[] list=values.split(",");
-            for (String value : list)
-                deleteWhenValues.add(values.trim());
-        }
-
+        this.statusField =props.getString("statusField",null);
+        this.statusActiveValues=props.getStringSet("statusActiveValues");
+        this.statusDeletedValues=props.getStringSet("statusDeletedValues");
     }
+
+
 
     @Override public boolean recordExists(String key)  { return records.containsKey(key);}
-    @Override public boolean isDeleteDesired(String key) {
-        if (deleteWhenField==null)
-            return false;
-        Record rec = getRecord(key);
+    public boolean isActive(Record rec) {
+        if (statusField==null)
+            return true;
         if (rec==null)
             return false;
-        return deleteWhenValues.contains(rec.getField(deleteWhenField));
+        return statusActiveValues.contains(rec.getField(statusField));
     }
-    @Override public boolean mayDeleteRecord(String key) { return recordExists(key); }
-    @Override public boolean mayUpdateRecord(String key) { return recordExists(key); }
+
+    @Override public boolean isDeleteDesired(Record rec) {
+        if (statusField==null)
+            return false;
+        if (rec==null)
+            return false;
+        return statusDeletedValues.contains(rec.getField(statusField));
+    }
+    @Override public boolean mayDeleteRecord(String key) { return isActive(getRecord(key)); }
+    @Override public boolean mayUpdateRecord(String key) { return isActive(getRecord(key)); }
     @Override public boolean mayCreateRecord(String key) { return ! recordExists(key); }
 
 

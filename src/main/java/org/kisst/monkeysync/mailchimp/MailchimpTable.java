@@ -46,7 +46,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
             return false;
         if ("pending".equals(rec.status))
             return false;
-        return true;
+        return isActive(rec);
     }
 
     @Override public boolean mayDeleteRecord(String key) {

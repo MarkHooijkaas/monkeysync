@@ -8,7 +8,7 @@ public interface Table {
     boolean mayUpdateRecord(String key);
     boolean mayDeleteRecord(String key);
 
-    boolean isDeleteDesired(String key);
+    boolean isDeleteDesired(Record rec);
 
     int size();
     Iterable<Record> records();
