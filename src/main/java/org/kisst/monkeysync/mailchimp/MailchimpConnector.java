@@ -19,11 +19,13 @@ public class MailchimpConnector {
     private final String baseurl;
     private final String apikey;
     private final String listid;
+    private final boolean update;
 
     public MailchimpConnector(Props props) {
         this.listid=props.getString("listid");
         this.baseurl = props.getString("url")+"lists/"+listid;
         this.apikey=props.getString("apikey");
+        this.update=props.getBoolean("update",false);
     }
 
 
@@ -32,7 +34,7 @@ public class MailchimpConnector {
     public void patch(String urlpart, String data) {call("PATCH", urlpart, data);}
     public String get(String urlpart) {
         OkHttpClient client = new OkHttpClient();
-        System.out.println(baseurl+urlpart);
+        Env.info("Retrieving from mailchimp:" ,baseurl+urlpart);
         String userpass=Base64.getEncoder().encodeToString(("dummy:"+apikey).getBytes());
         Request request = new Request.Builder()
                 .url(baseurl+urlpart)
@@ -45,11 +47,10 @@ public class MailchimpConnector {
     }
 
 
-    public boolean isDryRun() { return Env.props.getBoolean("mailchimp.dryrun",true); }
-
     public String call(String method, String urlpart, String data) {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, data);
+        Env.info(method+": "+urlpart,data);
         String userpass=Base64.getEncoder().encodeToString(("dummy:"+apikey).getBytes());
         Request request = new Request.Builder()
                 .url(baseurl+urlpart)
@@ -57,20 +58,17 @@ public class MailchimpConnector {
                 .header("Authorization", "Basic "+ userpass)
                 .build();
         try (Response response = client.newCall(request).execute()) {
+            if (response.code()!=200)
+                System.err.println("ERROR: "+response);
+            Env.debug("response: ", response.toString());
             return response.body().string();
         } catch (IOException e) { throw new RuntimeException(e);}
     }
 
-    public void createMember(String email, String fields, String necessaryInterest) {
-        JsonBuilder json=new JsonBuilder();
-        json.addStringField("email_address", email);
-        json.addStringField("status", "subscribed");
-        if (necessaryInterest!=null)
-            json.addUnescapedField("interests", "{'"+necessaryInterest+"':True}");
-        json.addUnescapedField("merge_fields", fields);
-            Env.verbose("Create: "+email,fields);
-        if (! isDryRun())
-            post("members/", json.toString() );
+    public void createMember(String email, String json) {
+        Env.verbose("Create: "+email,json);
+        if (update)
+            post("/members/", json );
     }
 
     public void updateMemberFields(String email, String fields, String necessaryInterest) {
@@ -80,7 +78,7 @@ public class MailchimpConnector {
             json.addUnescapedField("interests", "{'"+necessaryInterest+"':True}");
         json.addUnescapedField("merge_fields", fields);
         Env.verbose("Update: "+email,fields);
-        if (! isDryRun())
+        if (update)
             patch(memberUrl(email), json.toString() );
     }
 
@@ -89,7 +87,7 @@ public class MailchimpConnector {
         json.addStringField("email_address", email);
         json.addStringField("status", "unsubscribed");
         Env.verbose("Delete: ",email);
-        if (! isDryRun())
+        if (update)
             put(memberUrl(email), json.toString() );
     }
 
@@ -133,7 +131,7 @@ public class MailchimpConnector {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(email.toLowerCase().getBytes());
             byte[] digest = md.digest();
-             return "members/"+DatatypeConverter.printHexBinary(digest).toLowerCase();
+             return "/members/"+DatatypeConverter.printHexBinary(digest).toLowerCase();
         }
         catch (NoSuchAlgorithmException e) { throw new RuntimeException(e); }
     }

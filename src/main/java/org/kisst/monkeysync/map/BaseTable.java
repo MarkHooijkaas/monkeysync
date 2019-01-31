@@ -95,6 +95,7 @@ public abstract class BaseTable<R extends Record> implements Table {
     @Override public void delete(Record destrec) { records.remove(destrec.getKey());}
 
     protected final static Gson gson = new Gson();
+    //Gson gson = new GsonBuilder().create();
 
     public void load(Path p) {
         try (BufferedReader br = new BufferedReader(new FileReader(p.toString()))) {
@@ -112,7 +113,6 @@ public abstract class BaseTable<R extends Record> implements Table {
 
     public void save(String filename) {
         try (FileWriter file = new FileWriter(filename)) {
-            Gson gson = new GsonBuilder().create();
             for (Record rec: records.values()) {
                 file.write(rec.toJson());
                 file.write('\n');

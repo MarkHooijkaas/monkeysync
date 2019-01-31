@@ -12,7 +12,6 @@ import java.util.Map;
 
 public class MailchimpTable extends BaseTable<MailchimpRecord> implements MailchimpConnector.MemberInserter {
     private final MailchimpConnector connector;
-    public boolean updatesAllowed=false;
     private final String necessaryInterest;
     private final int offset;
     private final int maxsize;
@@ -86,24 +85,20 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void create(Record srcrec) {
         super.create(srcrec);
-        if (updatesAllowed)
-            connector.createMember(srcrec.getKey(), JsonHelper.toJson(srcrec),necessaryInterest);
+        connector.createMember(srcrec.getKey(), getRecord(srcrec.getKey()).toJson()); // TODO: ugly construct
     }
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
         super.update(destrec, diffs);
-        if (updatesAllowed) {
-            if (hasAllNecessaryInterests((MailchimpRecord) destrec))
-                connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), null); // no reason to set necessary interest again
-            else
-                connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), necessaryInterest);
-        }
+        if (hasAllNecessaryInterests((MailchimpRecord) destrec))
+            connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), null); // no reason to set necessary interest again
+        else
+            connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), necessaryInterest);
     }
 
     @Override public void delete(Record destrec) {
         super.delete(destrec);
-        if (updatesAllowed)
-            connector.unsubscribeMember(destrec.getKey());
+        connector.unsubscribeMember(destrec.getKey());
     }
 
 }
