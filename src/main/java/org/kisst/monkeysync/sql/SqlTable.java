@@ -15,16 +15,16 @@ import java.util.LinkedHashMap;
 
 public class SqlTable extends MapTable {
 
-    private final boolean trimValues;
 
     public SqlTable(Props props) {
         super(props);
         if (this.autoFetch)
             query(props);
-        this.trimValues=props.getBoolean("trimValues", true);
     }
 
     public void query(Props props) {
+        final boolean trimValues=props.getBoolean("trimValues", true);
+
         Props dbprops=props;
         if (props.getString("db",null)!=null)
             dbprops= Env.props.getProps(props.getString("db"));
