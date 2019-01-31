@@ -57,6 +57,7 @@ public class SqlTable extends MapTable {
                     map.put(colname, value);
                 }
                 String key=rs.getString(1);
+                //System.err.println(map);
                 create(new MapRecord(key, map));
             }
         }

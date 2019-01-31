@@ -1,7 +1,4 @@
-package org.kisst.monkeysync.sql;
-
-import org.kisst.monkeysync.Env;
-import org.kisst.monkeysync.Syncer;
+package org.kisst.monkeysync;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,6 +51,8 @@ public class Script {
             Env.verbosity=2;
         else if ("-q".equals(option) || "--quiet".equals(option))
             Env.verbosity=0;
+        else if ("-d".equals(option) || "--debug".equals(option))
+            Env.verbosity=3;
         else if ("-a".equals(option) || "--ask".equals(option))
             Env.interactive=true;
         else if ("-c".equals(option) || "--config".equals(option)) {
@@ -112,6 +111,7 @@ public class Script {
                 "  -h, --help           show this help message and exit\n" +
                 "  -a, --ask            if set will ask before each update\n" +
                 "  -v, --verbose        if set, will output details\n" +
+                "  -d, --debug          if set, will output extra details\n" +
                 "  -q, --quiet          if set, no output will be printed\n" +
                 "  -V, --version        print version information and exit\n" +
                 "  -n, --no --null      clear a property set in the configuration\n" +

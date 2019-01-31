@@ -86,8 +86,10 @@ public class Syncer {
                     identical++;
                 }
             }
-            else
+            else {
+                Env.debug("Not updatable: ",key);
                 blocked++;
+            }
         }
         Env.info("   updated:", ""+count);
         Env.info("   identical: ",""+identical);

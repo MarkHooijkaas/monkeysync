@@ -1,7 +1,5 @@
 package org.kisst.monkeysync;
 
-import org.kisst.monkeysync.sql.Script;
-
 import java.nio.file.Paths;
 
 public class SyncCli {
