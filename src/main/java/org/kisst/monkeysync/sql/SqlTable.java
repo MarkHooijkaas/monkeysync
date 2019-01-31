@@ -48,7 +48,7 @@ public class SqlTable extends MapTable {
             while (rs.next()) {
                 LinkedHashMap<String, String> map= new LinkedHashMap<>();
                 //Record rec=new Record();
-                for (int i = 1; i < nrofColumns; i++) {
+                for (int i = 1; i <= nrofColumns; i++) {
                     String colname=columns.getColumnName(i);
                     if (ignoreColumns.contains(colname))
                         continue;
