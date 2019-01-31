@@ -34,8 +34,13 @@ public class Syncer {
     public int createNewRecords(Table srcTable, Table destTable) {
         Env.info("* Creating", "");
         int count=0;
+        int inactive=0;
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
+            if (!srcTable.isActive(src)) {
+                inactive++;
+                continue;
+            }
             if (destTable.mayCreateRecord(key)) {
                 if (Env.ask("About to create "+key)) {
                     destTable.create(src);
@@ -45,6 +50,7 @@ public class Syncer {
             }
         }
         Env.info("   created :", ""+count);
+        Env.info("   inactive :", ""+inactive);
         return count;
     }
 

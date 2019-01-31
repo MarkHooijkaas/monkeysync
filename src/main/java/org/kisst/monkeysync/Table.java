@@ -8,6 +8,7 @@ public interface Table {
     boolean mayUpdateRecord(String key);
     boolean mayDeleteRecord(String key);
 
+    boolean isActive(Record rec);
     boolean isDeleteDesired(Record rec);
 
     int size();
