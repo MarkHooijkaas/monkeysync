@@ -15,10 +15,13 @@ import java.util.LinkedHashMap;
 
 public class SqlTable extends MapTable {
 
+    private final boolean trimValues;
+
     public SqlTable(Props props) {
         super(props);
         if (this.autoFetch)
             query(props);
+        this.trimValues=props.getBoolean("trimValues", true);
     }
 
     public void query(Props props) {
@@ -53,11 +56,12 @@ public class SqlTable extends MapTable {
                     if (ignoreColumns.contains(colname))
                         continue;
                     String value=rs.getString(i);
-                    //System.out.println(colname+i+value);
-                    map.put(colname, value);
+                    if (trimValues && value!=null)
+                        map.put(colname, value.trim());
+                    else
+                        map.put(colname, value);
                 }
                 String key=rs.getString(1);
-                //System.err.println(map);
                 create(new MapRecord(key, map));
             }
         }
