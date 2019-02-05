@@ -1,9 +1,7 @@
 package org.kisst.monkeysync.mailchimp;
 
-import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
-import org.kisst.monkeysync.json.JsonHelper;
 import org.kisst.monkeysync.map.BaseTable;
 
 import java.io.FileOutputStream;
