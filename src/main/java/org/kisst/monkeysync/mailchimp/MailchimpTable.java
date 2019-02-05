@@ -1,5 +1,6 @@
 package org.kisst.monkeysync.mailchimp;
 
+import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.json.JsonHelper;
@@ -90,10 +91,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
         super.update(destrec, diffs);
-        if (hasAllNecessaryInterests((MailchimpRecord) destrec))
-            connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), null); // no reason to set necessary interest again
-        else
-            connector.updateMemberFields(destrec.getKey(), JsonHelper.toJson(diffs), necessaryInterest);
+        connector.updateMemberFields(destrec.getKey(), diffs); // no reason to set necessary interest again
     }
 
     @Override public void delete(Record destrec) {

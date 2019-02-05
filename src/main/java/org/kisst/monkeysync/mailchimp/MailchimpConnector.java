@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MailchimpConnector {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -71,24 +73,21 @@ public class MailchimpConnector {
             post("/members/", json );
     }
 
-    public void updateMemberFields(String email, String fields, String necessaryInterest) {
-        JsonBuilder json=new JsonBuilder();
-        json.addStringField("email_address", email);
-        if (necessaryInterest!=null)
-            json.addUnescapedField("interests", "{'"+necessaryInterest+"':True}");
-        json.addUnescapedField("merge_fields", fields);
-        Env.verbose("Update: "+email,fields);
+    public void updateMemberFields(String email, Map<String, String> diffs) {
+        HashMap<String, Object> struct= new HashMap<>();
+        struct.put("email_address", email);
+        struct.put("merge_fields", diffs);
         if (update)
-            patch(memberUrl(email), json.toString() );
+            patch(memberUrl(email), gson.toJson(struct));
     }
 
     public void unsubscribeMember(String email) {
-        JsonBuilder json=new JsonBuilder();
-        json.addStringField("email_address", email);
-        json.addStringField("status", "unsubscribed");
+        HashMap<String, Object> struct= new HashMap<>();
+        struct.put("email_address", email);
+        struct.put("status", "unsubscribed");
         Env.verbose("Delete: ",email);
         if (update)
-            put(memberUrl(email), json.toString() );
+            put(memberUrl(email), gson.toJson(struct) );
     }
 
     public static interface MemberInserter {
@@ -107,7 +106,7 @@ public class MailchimpConnector {
         int max_item=offset+count;
         do {
             String httpresult = getMembers(offset, Math.min(count,pagesize));
-            Env.verbose(httpresult, "");
+            Env.debug(httpresult, "");
             respons =gson.fromJson(httpresult,MailchimpMemberResponse.class);
             count-=pagesize;
             offset+=pagesize;
