@@ -14,15 +14,25 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     private final String necessaryInterest;
     private final int offset;
     private final int maxsize;
+    private final String updatePeriod;
+    private final boolean resubscribeAllowed;
+    private final boolean useUnsubscribe;
+    private final boolean clearAllOnUnsubscribe;
+    private final boolean deletePermanent;
 
     public MailchimpTable(Props props) {
         super(props);
         this.connector = new MailchimpConnector(props);
+        this.updatePeriod = props.getString("updatePeriod",null);
         this.offset= props.getInt("offset", 0); // Not too big, since there is still ssome arihtmetic done
         this.maxsize= props.getInt("count", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
         if (this.autoFetch)
             retrieveAllMembers();
+        this.resubscribeAllowed=props.getBoolean("resubscribeAllowed", false);
+        this.useUnsubscribe=props.getBoolean("useUnsubscribe", true);
+        this.clearAllOnUnsubscribe=props.getBoolean("clearAllOnUnsubscribe", true);
+        this.deletePermanent=props.getBoolean("deletePermanent", false);
     }
 
 
@@ -38,7 +48,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     protected boolean mayRecordBeChanged(MailchimpRecord rec) {
         if (rec==null)
             return false;
-        if ("unsubscribed".equals(rec.status))
+        if ("unsubscribed".equals(rec.status) && ! resubscribeAllowed)
             return false;
         if ("cleaned".equals(rec.status))
             return false;
@@ -72,7 +82,6 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
 
     @Override protected MailchimpRecord createRecord(String json) {
-        //LinkedHashMap<String, String> map = gson.fromJson(json, LinkedHashMap.class);
         return new MailchimpRecord(json);
     }
     @Override protected MailchimpRecord createRecord(Record rec) {
@@ -94,7 +103,11 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void delete(Record destrec) {
         super.delete(destrec);
-        connector.unsubscribeMember(destrec.getKey());
+        if (useUnsubscribe)
+            connector.unsubscribeMember(destrec.getKey(),clearAllOnUnsubscribe);
+        else
+            connector.deleteMember(destrec.getKey(), deletePermanent);
+
     }
 
 }

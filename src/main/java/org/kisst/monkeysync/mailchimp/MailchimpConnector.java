@@ -33,32 +33,24 @@ public class MailchimpConnector {
     public void put(String urlpart, String data) {call("PUT", urlpart, data);}
     public void post(String urlpart, String data) {call("POST", urlpart, data);}
     public void patch(String urlpart, String data) {call("PATCH", urlpart, data);}
-    public String get(String urlpart) {
-        OkHttpClient client = new OkHttpClient();
-        Env.info("Retrieving from mailchimp:" ,baseurl+urlpart);
-        String userpass=Base64.getEncoder().encodeToString(("dummy:"+apikey).getBytes());
-        Request request = new Request.Builder()
-                .url(baseurl+urlpart)
-                .header("Authorization", "Basic "+ userpass)
-                .get()
-                .build();
-        try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
-        } catch (IOException e) { throw new RuntimeException(e);}
-    }
-
+    public void delete(String urlpart) { call("DELETE", urlpart, null); }
+    public String get(String urlpart) { return call("GET", urlpart, null); }
 
     public String call(String method, String urlpart, String data) {
         OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(JSON, data);
-        Env.info(method+": "+urlpart,data);
         String userpass=Base64.getEncoder().encodeToString(("dummy:"+apikey).getBytes());
-        Request request = new Request.Builder()
+        Request.Builder builder= new Request.Builder()
                 .url(baseurl+urlpart)
-                .method(method, body)
-                .header("Authorization", "Basic "+ userpass)
-                .build();
-        try (Response response = client.newCall(request).execute()) {
+                .header("Authorization", "Basic "+ userpass);
+        if ("GET".equals(method))
+            builder.get();
+        else if ("DELETE".equals(method))
+            builder.delete();
+        else
+            builder.method(method, RequestBody.create(JSON, data));
+        Env.info(method + ": " + urlpart, data);
+
+        try (Response response = client.newCall(builder.build()).execute()) {
             if (response.code()!=200)
                 System.err.println("ERROR: "+response);
             Env.debug("response: ", response.toString());
@@ -80,14 +72,28 @@ public class MailchimpConnector {
             patch(memberUrl(email), gson.toJson(struct));
     }
 
-    public void unsubscribeMember(String email) {
+    public void unsubscribeMember(String email, boolean clearAllFields) {
         HashMap<String, Object> struct= new HashMap<>();
         struct.put("email_address", email);
         struct.put("status", "unsubscribed");
         Env.verbose("Delete: ",email);
-        if (update)
-            put(memberUrl(email), gson.toJson(struct) );
+        if (update) {
+            if (clearAllFields)
+                put(memberUrl(email), gson.toJson(struct));
+            else
+                patch(memberUrl(email), gson.toJson(struct));
+        }
     }
+
+    public void deleteMember(String email, boolean permanent) {
+        if (update) {
+            if (permanent)
+                post(memberUrl(email)+"/actions/delete-permanent", "");
+            else
+                delete(memberUrl(email));
+        }
+    }
+
 
     public static interface MemberInserter {
         //void suggestSize(int size);
