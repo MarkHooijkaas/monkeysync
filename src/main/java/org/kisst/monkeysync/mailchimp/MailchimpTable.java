@@ -7,6 +7,8 @@ import org.kisst.monkeysync.map.BaseTable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 
 public class MailchimpTable extends BaseTable<MailchimpRecord> implements MailchimpConnector.MemberInserter {
@@ -14,7 +16,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     private final String necessaryInterest;
     private final int offset;
     private final int maxsize;
-    private final String updatePeriod;
+    private final String updateDuration;
     private final boolean resubscribeAllowed;
     private final boolean useUnsubscribe;
     private final boolean clearAllOnUnsubscribe;
@@ -23,12 +25,14 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     public MailchimpTable(Props props) {
         super(props);
         this.connector = new MailchimpConnector(props);
-        this.updatePeriod = props.getString("updatePeriod",null);
+        this.updateDuration = props.getString("updateDuration",null);
         this.offset= props.getInt("offset", 0); // Not too big, since there is still ssome arihtmetic done
         this.maxsize= props.getInt("count", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
         if (this.autoFetch)
             retrieveAllMembers();
+        if (this.updateDuration!=null)
+            retrieveMembersSince(updateDuration);
         this.resubscribeAllowed=props.getBoolean("resubscribeAllowed", false);
         this.useUnsubscribe=props.getBoolean("useUnsubscribe", true);
         this.clearAllOnUnsubscribe=props.getBoolean("clearAllOnUnsubscribe", true);
@@ -70,7 +74,20 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     public void retrieveAllMembers() {
         try (FileOutputStream f=new FileOutputStream("mailchimp-retrieval-log.json")) {
             out= new PrintWriter(f);
-            connector.insertAllMembers(this, offset, maxsize);
+            connector.insertAllMembers(this, offset, maxsize, "");
+            out.close();
+        }
+        catch (IOException e) {throw  new RuntimeException(e); }
+    }
+    public void retrieveMembersSince(String durationSpec) {
+        if (! durationSpec.startsWith("P"))
+            durationSpec="P"+durationSpec;
+        Duration p=Duration.parse(durationSpec);
+        Instant time= Instant.now().minus(p);
+        String iso8601=time.toString();
+        try (FileOutputStream f=new FileOutputStream("mailchimp-retrieval-log.json")) {
+            out= new PrintWriter(f);
+            connector.insertAllMembers(this, offset, maxsize, "since_last_changed="+iso8601);
             out.close();
         }
         catch (IOException e) {throw  new RuntimeException(e); }

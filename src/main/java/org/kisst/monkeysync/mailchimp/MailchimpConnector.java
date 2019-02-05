@@ -105,12 +105,12 @@ public class MailchimpConnector {
         public List<MailchimpRecord> members;
     }
 
-    public int insertAllMembers(MemberInserter db, int offset, int count) {
+    public int insertAllMembers(MemberInserter db, int offset, int count, String urlOptions) {
         int pagesize=100;
         MailchimpMemberResponse respons;
         int max_item=offset+count;
         do {
-            String httpresult = getMembers(offset, Math.min(count,pagesize));
+            String httpresult = getMembers(offset, Math.min(count,pagesize), urlOptions);
             Env.debug(httpresult, "");
             respons =gson.fromJson(httpresult,MailchimpMemberResponse.class);
             count-=pagesize;
@@ -124,9 +124,11 @@ public class MailchimpConnector {
     }
 
     private static final Gson gson = new Gson();
-    public String getMembers(int offset, int count) {
+    public String getMembers(int offset, int count, String urlOptions) {
+        if (urlOptions.length()>0 && ! urlOptions.startsWith("&"))
+            urlOptions="&"+urlOptions;
         String fields="members.email_address,members.merge_fields,members.interests,members.status";
-        return get("/members/?include_fields="+fields+"&exclude_fields=members._links,_links&count="+count+"&offset="+offset);
+        return get("/members/?include_fields="+fields+"&exclude_fields=members._links,_links&count="+count+"&offset="+offset+urlOptions);
 
     }
 
