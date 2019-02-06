@@ -1,7 +1,6 @@
 package org.kisst.monkeysync.map;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.Table;
