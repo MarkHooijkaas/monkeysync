@@ -15,10 +15,10 @@ import java.util.LinkedHashMap;
 
 public class SqlTable extends MapTable {
 
-
     public SqlTable(Props props) {
         super(props);
-        if (this.autoFetch)
+        boolean retrieveAll= props.getBoolean("retrieveAll",file==null);
+        if (retrieveAll)
             query(props);
     }
 

@@ -19,7 +19,6 @@ import java.util.Set;
 public abstract class BaseTable<R extends Record> implements Table {
     protected final LinkedHashMap<String, R> records=new LinkedHashMap<>();
     protected final String file;
-    protected final boolean autoFetch;
     protected final boolean autoSave;
     private final String statusField;
     private final Set<String> statusActiveValues;
@@ -30,7 +29,6 @@ public abstract class BaseTable<R extends Record> implements Table {
         this.file = props.getString("file",null);
         if (file!=null)
             load(Paths.get(file));
-        this.autoFetch = props.getBoolean("autoFetch",file==null);
         this.autoSave= props.getBoolean("autoSave",true);
         this.statusField =props.getString("statusField",null);
         this.statusCaseSensitive =props.getBoolean("statusField",true);

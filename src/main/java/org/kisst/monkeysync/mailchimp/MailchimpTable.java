@@ -15,9 +15,11 @@ import java.util.Map;
 public class MailchimpTable extends BaseTable<MailchimpRecord> implements MailchimpConnector.MemberInserter {
     private final MailchimpConnector connector;
     private final String necessaryInterest;
+    private final boolean retrieveAll;
+    private final String retrieveSince;
     private final int offset;
     private final int maxsize;
-    private final String updateDuration;
+
     private final boolean resubscribeAllowed;
     private final boolean useUnsubscribe;
     private final boolean clearAllOnUnsubscribe;
@@ -27,25 +29,28 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     public MailchimpTable(Props props) {
         super(props);
         this.connector = new MailchimpConnector(props);
-        this.updateDuration = props.getString("updateDuration",null);
         this.offset= props.getInt("offset", 0); // Not too big, since there is still ssome arihtmetic done
         this.maxsize= props.getInt("count", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
-        if (this.autoFetch) {
+
+        this.retrieveAll= props.getBoolean("retrieveAll",file==null);
+        this.retrieveSince = props.getString("retrieveSince",null);
+        if (this.retrieveAll) {
             retrieveAllMembers();
             if (autoSave)
                 save(file);
         }
-        if (this.updateDuration!=null) {
-            retrieveMembersSince(updateDuration);
+        if (this.retrieveSince!=null) {
+            retrieveMembersSince(retrieveSince);
             if (autoSave)
                 save(file);
         }
+
+        this.modifyMailchimp=props.getBoolean("modifyMailchimp", false);
         this.resubscribeAllowed=props.getBoolean("resubscribeAllowed", false);
         this.useUnsubscribe=props.getBoolean("useUnsubscribe", true);
         this.clearAllOnUnsubscribe=props.getBoolean("clearAllOnUnsubscribe", true);
         this.deletePermanent=props.getBoolean("deletePermanent", false);
-        this.modifyMailchimp=props.getBoolean("modifyMailchimp", false);
     }
 
 
@@ -79,14 +84,8 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         return mayRecordBeChanged(rec);
     }
 
-    PrintWriter out; // logging file to save mailchimp retrieval if it crashes (e.g. Out of memory), and can't be saved
     public void retrieveAllMembers() {
-        try (FileOutputStream f=new FileOutputStream("mailchimp-retrieval-log.json")) {
-            out= new PrintWriter(f);
-            connector.insertAllMembers(this, offset, maxsize, "");
-            out.close();
-        }
-        catch (IOException e) {throw  new RuntimeException(e); }
+        connector.insertAllMembers(this, offset, maxsize, "");
     }
     public void retrieveMembersSince(String durationSpec) {
         if (! durationSpec.startsWith("P"))
@@ -94,16 +93,10 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         Duration p=Duration.parse(durationSpec);
         Instant time= Instant.now().minus(p);
         String iso8601=time.toString();
-        try (FileOutputStream f=new FileOutputStream("mailchimp-retrieval-log.json")) {
-            out= new PrintWriter(f);
-            connector.insertAllMembers(this, offset, maxsize, "since_last_changed="+iso8601);
-            out.close();
-        }
-        catch (IOException e) {throw  new RuntimeException(e); }
+        connector.insertAllMembers(this, offset, maxsize, "since_last_changed="+iso8601);
     }
     @Override public void insert(MailchimpRecord rec) {
         records.put(rec.getKey(),rec);
-        out.println(rec.toJson());
     }
 
 
@@ -113,8 +106,6 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     @Override protected MailchimpRecord createRecord(Record rec) {
         return new MailchimpRecord(rec, necessaryInterest);
     }
-
-
 
 
     @Override public void create(Record srcrec) {
