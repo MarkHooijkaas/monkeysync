@@ -1,5 +1,6 @@
 package org.kisst.monkeysync.mailchimp;
 
+import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.map.BaseTable;
@@ -21,6 +22,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     private final boolean useUnsubscribe;
     private final boolean clearAllOnUnsubscribe;
     private final boolean deletePermanent;
+    private final boolean modifyMailchimp;
 
     public MailchimpTable(Props props) {
         super(props);
@@ -29,14 +31,21 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         this.offset= props.getInt("offset", 0); // Not too big, since there is still ssome arihtmetic done
         this.maxsize= props.getInt("count", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
-        if (this.autoFetch)
+        if (this.autoFetch) {
             retrieveAllMembers();
-        if (this.updateDuration!=null)
+            if (autoSave)
+                save(file);
+        }
+        if (this.updateDuration!=null) {
             retrieveMembersSince(updateDuration);
+            if (autoSave)
+                save(file);
+        }
         this.resubscribeAllowed=props.getBoolean("resubscribeAllowed", false);
         this.useUnsubscribe=props.getBoolean("useUnsubscribe", true);
         this.clearAllOnUnsubscribe=props.getBoolean("clearAllOnUnsubscribe", true);
         this.deletePermanent=props.getBoolean("deletePermanent", false);
+        this.modifyMailchimp=props.getBoolean("modifyMailchimp", false);
     }
 
 
@@ -110,20 +119,26 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void create(Record srcrec) {
         super.create(srcrec);
-        connector.createMember(srcrec.getKey(), getRecord(srcrec.getKey()).toJson()); // TODO: ugly construct
+        Env.verbose("Create: "+srcrec.getKey(),srcrec.toJson());
+        if (modifyMailchimp)
+            connector.createMember(srcrec.getKey(), getRecord(srcrec.getKey()).toJson()); // TODO: ugly construct
     }
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
         super.update(destrec, diffs);
-        connector.updateMemberFields(destrec.getKey(), diffs); // no reason to set necessary interest again
+        if (modifyMailchimp)
+            connector.updateMemberFields(destrec.getKey(), diffs); // no reason to set necessary interest again
     }
 
     @Override public void delete(Record destrec) {
         super.delete(destrec);
-        if (useUnsubscribe)
-            connector.unsubscribeMember(destrec.getKey(),clearAllOnUnsubscribe);
-        else
-            connector.deleteMember(destrec.getKey(), deletePermanent);
+        Env.verbose("Delete: ",destrec.getKey());
+        if (modifyMailchimp) {
+            if (useUnsubscribe)
+                connector.unsubscribeMember(destrec.getKey(), clearAllOnUnsubscribe);
+            else
+                connector.deleteMember(destrec.getKey(), deletePermanent);
+        }
 
     }
 

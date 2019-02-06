@@ -20,13 +20,11 @@ public class MailchimpConnector {
     private final String baseurl;
     private final String apikey;
     private final String listid;
-    private final boolean update;
 
     public MailchimpConnector(Props props) {
         this.listid=props.getString("listid");
         this.baseurl = props.getString("url")+"lists/"+listid;
         this.apikey=props.getString("apikey");
-        this.update=props.getBoolean("update",false);
     }
 
 
@@ -51,7 +49,7 @@ public class MailchimpConnector {
         Env.info(method + ": " + urlpart, data);
 
         try (Response response = client.newCall(builder.build()).execute()) {
-            if (response.code()!=200)
+            if (response.code()!=200 && response.code()!=204) // 204 Means "no content", and is returned after a succesfull DELETE
                 System.err.println("ERROR: "+response);
             Env.debug("response: ", response.toString());
             return response.body().string();
@@ -59,39 +57,31 @@ public class MailchimpConnector {
     }
 
     public void createMember(String email, String json) {
-        Env.verbose("Create: "+email,json);
-        if (update)
-            post("/members/", json );
+        post("/members/", json );
     }
 
     public void updateMemberFields(String email, Map<String, String> diffs) {
         HashMap<String, Object> struct= new HashMap<>();
         struct.put("email_address", email);
         struct.put("merge_fields", diffs);
-        if (update)
-            patch(memberUrl(email), gson.toJson(struct));
+        patch(memberUrl(email), gson.toJson(struct));
     }
 
     public void unsubscribeMember(String email, boolean clearAllFields) {
         HashMap<String, Object> struct= new HashMap<>();
         struct.put("email_address", email);
         struct.put("status", "unsubscribed");
-        Env.verbose("Delete: ",email);
-        if (update) {
-            if (clearAllFields)
-                put(memberUrl(email), gson.toJson(struct));
-            else
-                patch(memberUrl(email), gson.toJson(struct));
-        }
+        if (clearAllFields)
+            put(memberUrl(email), gson.toJson(struct));
+        else
+            patch(memberUrl(email), gson.toJson(struct));
     }
 
     public void deleteMember(String email, boolean permanent) {
-        if (update) {
-            if (permanent)
-                post(memberUrl(email)+"/actions/delete-permanent", "");
-            else
-                delete(memberUrl(email));
-        }
+        if (permanent)
+            post(memberUrl(email)+"/actions/delete-permanent", "");
+        else
+            delete(memberUrl(email));
     }
 
 
