@@ -20,11 +20,13 @@ public class MailchimpConnector {
     private final String baseurl;
     private final String apikey;
     private final String listid;
+    private final boolean continueOnError;
 
     public MailchimpConnector(Props props) {
         this.listid=props.getString("listid");
         this.baseurl = props.getString("url")+"lists/"+listid;
         this.apikey=props.getString("apikey");
+        this.continueOnError=props.getBoolean("continueOnError", false);
     }
 
 
@@ -46,18 +48,25 @@ public class MailchimpConnector {
             builder.delete();
         else
             builder.method(method, RequestBody.create(JSON, data));
-        Env.info(method + ": " + urlpart, data);
+        Env.verbose(method + ": " + urlpart, data);
 
         try (Response response = client.newCall(builder.build()).execute()) {
-            if (response.code()!=200 && response.code()!=204) // 204 Means "no content", and is returned after a succesfull DELETE
-                System.err.println("ERROR: "+response);
-            Env.debug("response: ", response.toString());
-            return response.body().string();
+            String body=response.body().string();
+            if (response.code()!=200 && response.code()!=204) {// 204 Means "no content", and is returned after a succesfull DELETE
+                if (continueOnError)
+                    System.err.println("HTTP ERROR: " + response+body);
+                else
+                    throw new RuntimeException("HTTP ERROR: " + response+body);
+            }
+            else
+                Env.debug("response: ", response.toString());
+            return body;
         } catch (IOException e) { throw new RuntimeException(e);}
     }
 
     public void createMember(String email, String json) {
-        post("/members/", json );
+        put(memberUrl(email), json );
+        //post("/members/", json );
     }
 
     public void updateMemberFields(String email, Map<String, String> diffs) {

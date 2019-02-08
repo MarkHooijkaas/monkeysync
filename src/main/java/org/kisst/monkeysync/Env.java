@@ -28,9 +28,9 @@ public class Env {
         if (verbosity>=2)
             System.out.println(s+key);
     }
-    static public void debug(String s, String key) {
+    static public void debug(String s, Object data) {
         if (verbosity>=3)
-            System.out.println(s+key);
+            System.out.println(s+data);
     }
     static public boolean ask(String s) {
         if (interactive) {
