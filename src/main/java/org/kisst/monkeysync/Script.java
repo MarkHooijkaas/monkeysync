@@ -75,8 +75,12 @@ public class Script {
         for (int i=0; i<parts.length; i++)
             parts[i]=substitute(parts[i]);
         String cmd=parts[0].trim();
-        if ("save".equals(cmd))
-            Env.getTable(parts[1]).save(parts[2]);
+        if ("save".equals(cmd)) {
+            if (parts.length>2)
+                Env.getTable(parts[1]).save(parts[2]);
+            else
+                Env.getTable(parts[1]).save();
+        }
         else if ("sync".equals(cmd))
             new Syncer().syncAll(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("syncCreate".equals(cmd))

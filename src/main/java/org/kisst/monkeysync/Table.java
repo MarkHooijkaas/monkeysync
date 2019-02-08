@@ -21,4 +21,5 @@ public interface Table {
     void delete(Record destrec);
 
     void save(String filename);
+    void save();
 }

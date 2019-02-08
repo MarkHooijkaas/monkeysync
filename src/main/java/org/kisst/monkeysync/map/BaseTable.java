@@ -1,6 +1,7 @@
 package org.kisst.monkeysync.map;
 
 import com.google.gson.Gson;
+import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.Table;
@@ -116,6 +117,11 @@ public abstract class BaseTable<R extends Record> implements Table {
         catch (IOException e) { throw new RuntimeException(e);}
     }
 
+    public void save() {
+        if (file==null)
+            throw new IllegalArgumentException("No file configured to save table");
+        save(file);
+    }
     public void save(String filename) {
         try (FileWriter file = new FileWriter(filename)) {
             for (Record rec: records.values()) {
@@ -124,5 +130,6 @@ public abstract class BaseTable<R extends Record> implements Table {
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
+        Env.info("*** Saved "+records.size()+" records to ",filename);
     }
 }
