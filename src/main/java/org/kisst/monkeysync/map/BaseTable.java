@@ -24,8 +24,10 @@ public abstract class BaseTable<R extends Record> implements Table {
     private final Set<String> statusActiveValues;
     private final Set<String> statusDeletedValues;
     private final boolean statusCaseSensitive;
+    private final boolean keyIsCaseInsensitive;
 
     public BaseTable(Props props) {
+        this.keyIsCaseInsensitive=props.getBoolean("keyIsCaseInsensitive", true);
         this.file = props.getString("file",null);
         if (file!=null)
             load(Paths.get(file));
@@ -42,9 +44,12 @@ public abstract class BaseTable<R extends Record> implements Table {
         }
     }
 
+    protected String key(String key) { if (keyIsCaseInsensitive) return key.toLowerCase(); return key; }
+    protected String key(Record rec) { if (keyIsCaseInsensitive) return rec.getKey().toLowerCase(); return rec.getKey(); }
 
-
-    @Override public boolean recordExists(String key)  { return records.containsKey(key);}
+    @Override public boolean recordExists(String key)  {
+        return records.containsKey(key(key));
+    }
     public boolean isActive(Record rec) {
         if (statusField==null)
             return true;
@@ -71,7 +76,9 @@ public abstract class BaseTable<R extends Record> implements Table {
     @Override public boolean mayCreateRecord(String key) { return ! recordExists(key); }
 
 
-    @Override public Record getRecord(String key) { return records.get(key);}
+    @Override public Record getRecord(String key) {
+        return records.get(key(key));
+    }
     @Override public int size() { return records.size();}
 
     @Override public Iterable<Record> records() {
@@ -85,16 +92,15 @@ public abstract class BaseTable<R extends Record> implements Table {
     abstract protected R createRecord(Record rec);
 
     @Override public void create(Record srcrec) {
-        records.put(srcrec.getKey(), createRecord(srcrec));}
+        records.put(key(srcrec), createRecord(srcrec));}
 
     @Override public void update(Record destrec, Map<String, String> diffs) {
         for (String field: diffs.keySet())
            destrec.setField(field, diffs.get(field));
     }
-    @Override public void delete(Record destrec) { records.remove(destrec.getKey());}
+    @Override public void delete(Record destrec) { records.remove(key(destrec));}
 
     protected final static Gson gson = new Gson();
-    //Gson gson = new GsonBuilder().create();
 
     public void load(Path p) {
         try (BufferedReader br = new BufferedReader(new FileReader(p.toString()))) {
@@ -103,7 +109,7 @@ public abstract class BaseTable<R extends Record> implements Table {
                 //System.out.println(line);
                 if (line.trim().length() > 0) {
                     R rec = createRecord(line);
-                    records.put(rec.getKey(), rec);
+                    records.put(key(rec), rec);
                 }
             }
         }
