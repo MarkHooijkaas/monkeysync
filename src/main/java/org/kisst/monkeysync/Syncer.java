@@ -60,12 +60,17 @@ public class Syncer {
         int identical=0;
         int blocked=0;
         int missing=0;
+        int notActive=0;
         LinkedHashMap<String, String> diffs=new LinkedHashMap<>();
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
             Record dest=destTable.getRecord(key);
             if (dest==null) {
                 missing++;
+                continue;
+            }
+            if (! srcTable.isActive(src)) {
+                notActive++;
                 continue;
             }
             if (destTable.mayUpdateRecord(key)) {
@@ -100,6 +105,7 @@ public class Syncer {
         Env.info("   updated:", ""+count);
         Env.info("   identical: ",""+identical);
         Env.info("   not found in destination: ",""+missing);
+        Env.info("   not active in source: ",""+notActive);
         Env.info("   blocked for updating: ",""+blocked);
         return count;
     }
