@@ -37,12 +37,12 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         this.retrieveSince = props.getString("retrieveSince",null);
         if (this.retrieveAll) {
             retrieveAllMembers();
-            if (autoSave)
+            if (autoSave && file!=null)
                 save(file);
         }
         if (this.retrieveSince!=null) {
             retrieveMembersSince(retrieveSince);
-            if (autoSave)
+            if (autoSave && file!=null)
                 save(file);
         }
 
