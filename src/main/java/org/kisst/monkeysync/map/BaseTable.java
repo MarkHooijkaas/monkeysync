@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class BaseTable<R extends Record> implements Table {
+    private final LinkedHashMap<String, String> fieldNames=new LinkedHashMap<>();
     protected final LinkedHashMap<String, R> records=new LinkedHashMap<>();
     protected final String file;
     protected final boolean autoSave;
@@ -62,6 +63,7 @@ public abstract class BaseTable<R extends Record> implements Table {
         return statusActiveValues.contains(status);
     }
 
+    public void addFieldName(String name) { fieldNames.put(name,name);}
     @Override public boolean isDeleteDesired(Record rec) {
         if (statusField==null)
             return false;
@@ -126,6 +128,26 @@ public abstract class BaseTable<R extends Record> implements Table {
         try (FileWriter file = new FileWriter(filename)) {
             for (Record rec: records.values()) {
                 file.write(rec.toJson());
+                file.write('\n');
+            }
+        }
+        catch (IOException e) { throw new RuntimeException(e);}
+        Env.info("*** Saved "+records.size()+" records to ",filename);
+    }
+
+    public void saveTabDelimited(String filename) {
+        try (FileWriter file = new FileWriter(filename)) {
+            for (Record rec: records.values()) {
+                String sep="";
+                for (String name : fieldNames.keySet()) {
+                    String value=rec.getField(name);
+                    if (value!=null)
+                        value=value.replaceAll("[\t\n]"," ");
+                    else
+                        value="";
+                    file.write(sep+value);
+                    sep="\t";
+                }
                 file.write('\n');
             }
         }
