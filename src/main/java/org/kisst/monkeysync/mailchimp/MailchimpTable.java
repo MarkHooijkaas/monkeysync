@@ -63,7 +63,18 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         return true;
     }
 
-    protected boolean mayRecordBeChanged(MailchimpRecord rec) {
+    @Override public boolean isActive(Record rec) {
+        if (((MailchimpRecord) rec).status.equals("subscribed"))
+            return super.isActive(rec);
+        return false;
+    }
+    @Override public boolean isDeleteDesired(Record rec) {
+        if (((MailchimpRecord) rec).status.equals("subscribed"))
+            return super.isDeleteDesired(rec);
+        return true;
+    }
+
+        protected boolean mayRecordBeChanged(MailchimpRecord rec) {
         if (rec==null)
             return false;
         if ("unsubscribed".equals(rec.status) && ! resubscribeAllowed)
