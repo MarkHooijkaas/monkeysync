@@ -55,6 +55,10 @@ public class Script {
             Env.verbosity=3;
         else if ("-a".equals(option) || "--ask".equals(option))
             Env.interactive=true;
+        else if ("-r".equals(option) || "--dry-run".equals(option))
+            Env.props.parseLine("sync.dryRun=true");
+        else if ("-w".equals(option) || "--wet-run".equals(option))
+            Env.props.parseLine("sync.dryRun=false");
         else if ("-c".equals(option) || "--config".equals(option)) {
             Env.loadProps(Paths.get(parts[i+1]));
             parts[i+1]="";
@@ -123,17 +127,20 @@ public class Script {
                 "Usage: monkeysync <command> [<arg>|<option>]*\n" +
                 "  -c, --config <file>  load a config file (multiple files are allowed)\n" +
                 "  -h, --help           show this help message and exit\n" +
-                "  -a, --ask            if set will ask before each update\n" +
                 "  -v, --verbose        if set, will output details\n" +
                 "  -d, --debug          if set, will output extra details\n" +
                 "  -q, --quiet          if set, no output will be printed\n" +
                 "  -V, --version        print version information and exit\n" +
                 "  -n, --no --null      clear a property set in the configuration\n" +
+                "  -r, --dry-run        do a dry(rehearsal) run without modifying anything\n" +
+                "  -w, --wet-run        do a wet(write) run that modifies the destination table\n" +
+                "  -a, --ask            if set will ask before each update\n" +
                 "  --<prop>=<value>     set/override any property from the loaded configuration\n" +
                 "  echo ....            echoes text to the console\n" +
                 "  run <file>           run a script from a file\n" +
-                "  load <name> <file>   load a table from <file> and name it <name>\n" +
-                "  save <name> <file>   save a table with <name> to <file> \n" +
+                "  fetch <name>         fetch the data for a table with <name> from it's source (e.g. SQL or Mailchimp)\n" +
+                "  load <name> [<file>] load a named table from <file>, or the default file\n" +
+                "  save <name> [<file>] save a table with <name> to <file> or the default file\n" +
                 "  sync <name1> <name2> sync table <name1> to table <name2>\n" +
                 "  syncCreate ...       sync only new records\n" +
                 "  syncUpdate ...       sync only existing records\n" +

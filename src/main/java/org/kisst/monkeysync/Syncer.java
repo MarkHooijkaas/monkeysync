@@ -5,14 +5,17 @@ import java.util.LinkedHashMap;
 
 public class Syncer {
     private boolean enableDeleteMissingRecords =false;
+    private final boolean dryRun;
     private final HashSet<String> ignoreFields=new HashSet<>();
 
     public Syncer(){
         // TODO: pass props
         String str=Env.props.getString("sync.ignoreFields",null);
-        if (str!=null)
+        if (str!=null) {
             for (String field : str.split(","))
                 ignoreFields.add(field.trim());
+        }
+        this.dryRun=Env.props.getBoolean("dryRun", true);
     }
 
     /**
@@ -43,7 +46,8 @@ public class Syncer {
             }
             if (destTable.mayCreateRecord(key)) {
                 if (Env.ask("About to create "+key)) {
-                    destTable.create(src);
+                    if (! dryRun)
+                        destTable.create(src);
                     Env.verbose("created ", src.getKey());
                     count++;
                 }
@@ -87,7 +91,8 @@ public class Syncer {
                 // System.out.println(diffs.size()+" for "+dest.getKey());
                 if (diffs.size()>0) {
                     if (Env.ask("About to merge "+key+diffs)) {
-                        destTable.update(dest, diffs);
+                        if (! dryRun)
+                            destTable.update(dest, diffs);
                         Env.verbose("merging: ", key + diffs);
                         count++;
                     }
@@ -118,7 +123,8 @@ public class Syncer {
             final String key = src.getKey();
             if (srcTable.isDeleteDesired(src) && destTable.mayDeleteRecord(key)) {
                 if (Env.ask("About to delete "+key)) {
-                    destTable.delete(src);
+                    if (! dryRun)
+                        destTable.delete(src);
                     Env.verbose("deleted ", src.getKey());
                     count++;
                 }
@@ -135,7 +141,8 @@ public class Syncer {
                 final String key = dest.getKey();
                 if (destTable.mayDeleteRecord(key) && !srcTable.recordExists(key)) {
                     if (Env.ask("About to delete "+key)) {
-                        destTable.delete(dest);
+                        if (! dryRun)
+                            destTable.delete(dest);
                         Env.verbose("deleted record which does not exist at source ", key);
                         count++;
                     }

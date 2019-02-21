@@ -7,8 +7,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -107,10 +105,10 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
     @Override public void load() {
         if (file==null)
             throw new IllegalArgumentException("No file configured to load table");
-        load(Paths.get(file));
+        load(file);
     }
-    public void load(Path p) {
-        try (BufferedReader br = new BufferedReader(new FileReader(p.toString()))) {
+    public void load(String filenname) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filenname))) {
             String line;
             while ((line = br.readLine()) != null) {
                 //System.out.println(line);
