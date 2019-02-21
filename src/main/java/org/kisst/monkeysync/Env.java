@@ -56,6 +56,12 @@ public class Env {
         tables.put(name, t);
         return t;
     }
+    static public Table loadTable(String name, String filename) {
+        Table t=createTable(name);
+        t.load(filename);
+        tables.put(name, t);
+        return t;
+    }
     static public Table fetchTable(String name) {
         Table t=createTable(name);
         t.fetch();
