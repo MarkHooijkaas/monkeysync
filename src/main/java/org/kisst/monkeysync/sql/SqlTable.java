@@ -15,14 +15,9 @@ import java.util.LinkedHashMap;
 
 public class SqlTable extends MapTable {
 
-    public SqlTable(Props props) {
-        super(props);
-        boolean retrieveAll= props.getBoolean("retrieveAll",file==null);
-        if (retrieveAll)
-            query(props);
-    }
+    public SqlTable(Props props) { super(props); }
 
-    public void query(Props props) {
+    @Override public void fetch() {
         final boolean trimValues=props.getBoolean("trimValues", true);
 
         Props dbprops=props;

@@ -1,10 +1,7 @@
 package org.kisst.monkeysync.map;
 
 import com.google.gson.Gson;
-import org.kisst.monkeysync.Env;
-import org.kisst.monkeysync.Props;
-import org.kisst.monkeysync.Record;
-import org.kisst.monkeysync.Table;
+import org.kisst.monkeysync.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -17,7 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class BaseTable<R extends Record> implements Table {
+public abstract class BaseTable<R extends Record> implements Table, CachedObject {
+    protected final Props props;
     private final LinkedHashMap<String, String> fieldNames=new LinkedHashMap<>();
     protected final LinkedHashMap<String, R> records=new LinkedHashMap<>();
     protected final String file;
@@ -29,10 +27,11 @@ public abstract class BaseTable<R extends Record> implements Table {
     private final boolean keyIsCaseInsensitive;
 
     public BaseTable(Props props) {
+        this.props=props;
         this.keyIsCaseInsensitive=props.getBoolean("keyIsCaseInsensitive", true);
         this.file = props.getString("file",null);
-        if (file!=null)
-            load(Paths.get(file));
+        //if (file!=null)
+        //    load(Paths.get(file));
         this.autoSave= props.getBoolean("autoSave",true);
         this.statusField =props.getString("statusField",null);
         this.statusCaseSensitive =props.getBoolean("statusField",true);
@@ -105,6 +104,11 @@ public abstract class BaseTable<R extends Record> implements Table {
 
     protected final static Gson gson = new Gson();
 
+    @Override public void load() {
+        if (file==null)
+            throw new IllegalArgumentException("No file configured to load table");
+        load(Paths.get(file));
+    }
     public void load(Path p) {
         try (BufferedReader br = new BufferedReader(new FileReader(p.toString()))) {
             String line;
@@ -119,12 +123,16 @@ public abstract class BaseTable<R extends Record> implements Table {
         catch (IOException e) { throw new RuntimeException(e);}
     }
 
-    public void save() {
+    public void autoSave() {
+        if (autoSave && file!=null)
+          save(file);
+    }
+    @Override public void save() {
         if (file==null)
             throw new IllegalArgumentException("No file configured to save table");
         save(file);
     }
-    public void save(String filename) {
+    @Override public void save(String filename) {
         try (FileWriter file = new FileWriter(filename)) {
             for (Record rec: records.values()) {
                 file.write(rec.toJson());

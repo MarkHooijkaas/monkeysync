@@ -5,7 +5,6 @@ import org.kisst.monkeysync.map.MapTable;
 import org.kisst.monkeysync.sql.SqlTable;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 
 public class Env {
@@ -51,7 +50,19 @@ public class Env {
         return tables.get(name);
     }
 
-    static private Table loadTable(String name) {
+    static public Table loadTable(String name) {
+        Table t=createTable(name);
+        t.load();
+        tables.put(name, t);
+        return t;
+    }
+    static public Table fetchTable(String name) {
+        Table t=createTable(name);
+        t.fetch();
+        tables.put(name, t);
+        return t;
+    }
+    static public Table createTable(String name) {
         Props tblprops=props.getProps(name);
         String type=tblprops.getString("type");
         if ("SqlTable".equals(type))

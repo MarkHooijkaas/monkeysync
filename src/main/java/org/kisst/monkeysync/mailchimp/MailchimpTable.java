@@ -29,28 +29,28 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     public MailchimpTable(Props props) {
         super(props);
         this.connector = new MailchimpConnector(props);
-        this.offset= props.getInt("offset", 0); // Not too big, since there is still ssome arihtmetic done
-        this.maxsize= props.getInt("count", 999999); // Not too big, since there is still ssome arihtmetic done
+        this.offset = props.getInt("offset", 0); // Not too big, since there is still ssome arihtmetic done
+        this.maxsize = props.getInt("count", 999999); // Not too big, since there is still ssome arihtmetic done
         this.necessaryInterest = props.getString("necessaryInterest", null);
 
-        this.retrieveAll= props.getBoolean("retrieveAll",file==null);
-        this.retrieveSince = props.getString("retrieveSince",null);
-        if (this.retrieveAll) {
-            retrieveAllMembers();
-            if (autoSave && file!=null)
-                save(file);
-        }
-        if (this.retrieveSince!=null) {
-            retrieveMembersSince(retrieveSince);
-            if (autoSave && file!=null)
-                save(file);
-        }
-
+        this.retrieveAll = props.getBoolean("retrieveAll", true);
+        this.retrieveSince = props.getString("retrieveSince", null);
         this.modifyMailchimp=props.getBoolean("modifyMailchimp", false);
         this.resubscribeAllowed=props.getBoolean("resubscribeAllowed", false);
         this.useUnsubscribe=props.getBoolean("useUnsubscribe", true);
         this.clearAllOnUnsubscribe=props.getBoolean("clearAllOnUnsubscribe", true);
         this.deletePermanent=props.getBoolean("deletePermanent", false);
+    }
+
+    @Override  public void fetch() {
+        if (this.retrieveAll) {
+            retrieveAll();
+            autoSave();
+        }
+        if (this.retrieveSince!=null) {
+            retrieveMembersSince(retrieveSince);
+            autoSave();
+        }
     }
 
 
@@ -95,7 +95,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         return mayRecordBeChanged(rec);
     }
 
-    public void retrieveAllMembers() {
+    public void retrieveAll() {
         connector.insertAllMembers(this, offset, maxsize, "");
     }
     public void retrieveMembersSince(String durationSpec) {

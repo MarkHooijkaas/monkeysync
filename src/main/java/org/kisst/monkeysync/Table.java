@@ -2,7 +2,7 @@ package org.kisst.monkeysync;
 
 import java.util.Map;
 
-public interface Table {
+public interface Table extends CachedObject {
     boolean recordExists(String key);
     boolean mayCreateRecord(String key);
     boolean mayUpdateRecord(String key);
@@ -19,7 +19,4 @@ public interface Table {
     void create(Record srcrec);
     void update(Record destrec, Map<String, String> diffs);
     void delete(Record destrec);
-
-    void save(String filename);
-    void save();
 }

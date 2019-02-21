@@ -81,6 +81,10 @@ public class Script {
             else
                 Env.getTable(parts[1]).save();
         }
+        else if ("load".equals(cmd))
+            Env.loadTable(parts[1]);
+        else if ("fetch".equals(cmd))
+            Env.fetchTable(parts[1]);
         else if ("sync".equals(cmd))
             new Syncer().syncAll(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("syncCreate".equals(cmd))
