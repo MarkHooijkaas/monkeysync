@@ -6,4 +6,5 @@ public interface CachedObject {
     void fetch();
     void save(String filename);
     void save();
+    void autoSave();
 }

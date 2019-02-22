@@ -55,6 +55,8 @@ public class Syncer {
         }
         Env.info("   created :", ""+count);
         Env.info("   inactive :", ""+inactive);
+        if (! dryRun)
+            destTable.autoSave();
         return count;
     }
 
@@ -112,6 +114,8 @@ public class Syncer {
         Env.info("   not found in destination: ",""+missing);
         Env.info("   not active in source: ",""+notActive);
         Env.info("   blocked for updating: ",""+blocked);
+        if (! dryRun)
+            destTable.autoSave();
         return count;
     }
 
@@ -131,6 +135,8 @@ public class Syncer {
             }
         }
         Env.info("   deleted because marked deleted in source:", ""+count);
+        if (! dryRun)
+            destTable.autoSave();
         return count;
     }
     public int deleteMissingRecords(Table srcTable, Table destTable) {
@@ -151,6 +157,8 @@ public class Syncer {
             }
         }
         Env.info("   deleted because missing in source:", ""+count);
+        if (! dryRun)
+            destTable.autoSave();
         return count;
     }
 }

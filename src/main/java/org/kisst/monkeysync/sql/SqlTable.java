@@ -61,6 +61,7 @@ public class SqlTable extends MapTable {
             }
         }
         catch (SQLException e) { throw new RuntimeException(e); }
+        autoSave();
     }
 
     private Connection connect(Props props) {
