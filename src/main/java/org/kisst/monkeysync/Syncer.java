@@ -15,7 +15,7 @@ public class Syncer {
             for (String field : str.split(","))
                 ignoreFields.add(field.trim());
         }
-        this.dryRun=Env.props.getBoolean("dryRun", true);
+        this.dryRun=Env.props.getBoolean("sync.dryRun", true);
     }
 
     /**
