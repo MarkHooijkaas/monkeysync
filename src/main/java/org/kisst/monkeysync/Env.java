@@ -19,6 +19,9 @@ public class Env {
         props.loadProps(p);
     }
 
+    public static void warn(String msg) {
+        System.out.println("WARNING: "+msg);
+    }
     static public void info(String s, String key) {
         if (verbosity>=1)
             System.out.println(s+key);

@@ -26,19 +26,50 @@ public class Script {
     }
 
     public void parse(String line) {
-        line=line.trim();
-        if (line.length()==0 || line.startsWith("#"))
+        line = line.trim();
+        if (line.length() == 0 || line.startsWith("#"))
             return;
         String[] parts = line.split("\\s+");
-        for (int i=0; i<parts.length; i++) {
-            if (parseOption(parts,i))
+        for (int i = 0; i < parts.length; i++) {
+            if (parseOption(parts, i))
                 parts[i] = "";
         }
-        Env.info("*** ",line.trim());
-       // optons might be removed from the parts so reassemble the parts
-        line=String.join(" ",parts);
-        parts=line.trim().split("\\s+");
-        parseCommands(parts);
+        Env.info("*** ", line.trim());
+        // optons might be removed from the parts so reassemble the parts
+        line = String.join(" ", parts);
+        parts = line.trim().split("\\s+");
+        tryCommand(parts);
+    }
+
+    private void tryCommand(String[] parts) {
+        String cmd=parts[0].trim();
+        int tries=Env.props.getInt("tries",Env.props.getInt(cmd+".tries",1));
+        if (tries==1) {
+            parseCommand(parts);
+            return;
+        }
+        int tryCount=0;
+
+        long retryInterval=Env.props.getInt("retryInterval",Env.props.getInt(cmd+".retryInterval",0));
+        boolean succeeded=false;
+        while (tryCount<tries && ! succeeded) {
+            try {
+                parseCommand(parts);
+                succeeded = true;
+            } catch (RuntimeException e) {
+                tryCount++;
+                if (tryCount>=tries)
+                    throw e;
+                Env.warn("Retrying "+cmd+" because it failed with error "+e.getMessage());
+                if (retryInterval>0) {
+                    try {
+                        Env.info("sleeping before retry","");
+                        Thread.sleep(retryInterval);
+                    }
+                    catch (InterruptedException e1) { throw new RuntimeException(e1);}
+                }
+            }
+        }
     }
 
     private boolean parseOption(String[] parts, int i) {
@@ -75,7 +106,7 @@ public class Script {
     }
 
 
-    private void parseCommands(String[] parts) {
+    private void parseCommand(String[] parts) {
         for (int i=0; i<parts.length; i++)
             parts[i]=substitute(parts[i]);
         String cmd=parts[0].trim();
@@ -113,8 +144,8 @@ public class Script {
         }
         else
             throw new RuntimeException("Unknown command "+cmd);
-
     }
+
     private String substitute(String str) {return Env.props.substitute(str);}
 
     private void showVersion() {
