@@ -10,21 +10,9 @@ import java.util.Properties;
 import java.util.Set;
 
 public class Props {
-    private static final String NULL=new String("@NULL@");
-    private final Props parent;
-    private final LinkedHashMap<String,String> props=new LinkedHashMap<>();
+    protected final LinkedHashMap<String,String> props=new LinkedHashMap<>();
 
-    public Props(Props parent) { this.parent=parent;}
-    public Props() { this(null);}
-
-    private String get(String key) {
-        String result=props.get(key);
-        if (result==NULL) // Hack to make it possible to clear a property set in the parent
-            return null;
-        if (result==null && parent!=null)
-            return parent.get(key);
-        return result;
-    }
+    public String get(String key) {  return props.get(key);}
 
     public String getString(String key, String defaultValue) {
         String result = get(key);
@@ -76,28 +64,12 @@ public class Props {
         return result;
     }
 
-    public Set<String> keySet() {
-        if (parent==null)
-            return props.keySet();
-
-        Set<String> result=parent.keySet();
-        for (String key : props.keySet()) {
-            if (props.get(key) == NULL)
-                result.remove(key);
-            else
-                result.add(key);
-        }
-        return result;
-    }
+    public Set<String> keySet() { return props.keySet(); }
 
     public Props getProps(String prefix) {
         if (! prefix.endsWith("."))
             prefix+=".";
-        Props result;
-        if (parent==null)
-            result=new Props();
-        else
-            result=parent.getProps(prefix);
+        Props result=new Props();
         for (String key: keySet()) {
             if (key.startsWith(prefix))
                 result.props.put(key.substring(prefix.length()), get(key));
@@ -130,12 +102,7 @@ public class Props {
             props.put(key,value);
         }
     }
-    public void clearProp(String name) {
-        if (parent==null)
-            props.remove(name);
-        else if (get(name)!=null)
-            props.put(name, NULL); // Override the parent property
-    }
+    public void clearProp(String name) { props.remove(name); }
 
     public String substitute(String str) {
         StringBuilder result = new StringBuilder();
