@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class Script {
@@ -136,6 +137,8 @@ public class Script {
             new Syncer().deleteInactiveRecords(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("syncDeleteMissing".equals(cmd))
             new Syncer().deleteMissingRecords(Env.getTable(parts[1]),Env.getTable(parts[2]));
+        else if ("mail".equals(cmd))
+            Mail.send(Arrays.copyOfRange(parts,1,parts.length));
         else if ("run".equals(cmd))
             new Script(Paths.get(parts[1])).run();
         else if ("echo".equals(cmd)) {
