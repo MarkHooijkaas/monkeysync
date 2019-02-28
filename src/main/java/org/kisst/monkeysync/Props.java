@@ -10,41 +10,55 @@ import java.util.Properties;
 import java.util.Set;
 
 public class Props {
+    private static final String NULL=new String("@NULL@");
+    private final Props parent;
     private final LinkedHashMap<String,String> props=new LinkedHashMap<>();
 
+    public Props(Props parent) { this.parent=parent;}
+    public Props() { this(null);}
+
+    private String get(String key) {
+        String result=props.get(key);
+        if (result==NULL) // Hack to make it possible to clear a property set in the parent
+            return null;
+        if (result==null && parent!=null)
+            return parent.get(key);
+        return result;
+    }
+
     public String getString(String key, String defaultValue) {
-        String result = props.get(key);
+        String result = get(key);
         if (result==null)
             return defaultValue;
         return result;
     }
     public Boolean getBoolean(String key, boolean defaultValue) {
-        String result = props.get(key);
+        String result = get(key);
         if (result==null)
             return defaultValue;
         return Boolean.parseBoolean(result);
     }
     public int getInt(String key, int defaultValue) {
-        String result = props.get(key);
+        String result = get(key);
         if (result==null)
             return defaultValue;
         return Integer.parseInt(result);
     }
 
     public String getString(String key) {
-        String result = props.get(key);
+        String result = get(key);
         if (result==null)
             throw new RuntimeException("Could not find string property "+key);
         return result;
     }
     public Boolean getBoolean(String key) {
-        String result = props.get(key);
+        String result = get(key);
         if (result==null)
             throw new RuntimeException("Could not find boolean property "+key);
         return Boolean.parseBoolean(result);
     }
     public int getInt(String key) {
-        String result = props.get(key);
+        String result = get(key);
         if (result==null)
             throw new RuntimeException("Could not find int property "+key);
         return Integer.parseInt(result);
@@ -62,13 +76,31 @@ public class Props {
         return result;
     }
 
-    public Props  getProps(String prefix) {
+    public Set<String> keySet() {
+        if (parent==null)
+            return props.keySet();
+
+        Set<String> result=parent.keySet();
+        for (String key : props.keySet()) {
+            if (props.get(key) == NULL)
+                result.remove(key);
+            else
+                result.add(key);
+        }
+        return result;
+    }
+
+    public Props getProps(String prefix) {
         if (! prefix.endsWith("."))
             prefix+=".";
-        Props result = new Props();
-        for (String key:props.keySet()) {
+        Props result;
+        if (parent==null)
+            result=new Props();
+        else
+            result=parent.getProps(prefix);
+        for (String key: keySet()) {
             if (key.startsWith(prefix))
-                result.props.put(key.substring(prefix.length()), props.get(key));
+                result.props.put(key.substring(prefix.length()), get(key));
         }
         return result;
     }
@@ -98,7 +130,12 @@ public class Props {
             props.put(key,value);
         }
     }
-    public void clearProp(String name) { props.remove(name); }
+    public void clearProp(String name) {
+        if (parent==null)
+            props.remove(name);
+        else if (get(name)!=null)
+            props.put(name, NULL); // Override the parent property
+    }
 
     public String substitute(String str) {
         StringBuilder result = new StringBuilder();
