@@ -52,7 +52,7 @@ public class Env {
         }
         if (verbosity>=level)
             System.out.println(line);
-        if (memoryLevel< level) {
+        if (memoryLevel>=level) {
             StringBuilder buffer=getBuffer(levelname);
             buffer.append(line+"\n");
         }
@@ -106,6 +106,10 @@ public class Env {
         if ("MapTable".equals(type))
             return new MapTable(tblprops);
         throw new RuntimeException("Unknown table type "+type);
+    }
+
+    static  public String substitute(String str) {
+        return StringUtil.substitute(str, props.props, objects, tables);
     }
 
 }

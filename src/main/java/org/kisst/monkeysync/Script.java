@@ -35,7 +35,7 @@ public class Script {
             if (parseOption(parts, i))
                 parts[i] = "";
         }
-        Env.info("*** ", line.trim());
+        Env.verbose("*** ", line.trim());
         // optons might be removed from the parts so reassemble the parts
         line = String.join(" ", parts);
         parts = line.trim().split("\\s+");
@@ -109,7 +109,7 @@ public class Script {
 
     private void parseCommand(String[] parts) {
         for (int i=0; i<parts.length; i++)
-            parts[i]=substitute(parts[i]);
+            parts[i]=Env.substitute(parts[i]);
         String cmd=parts[0].trim();
         if ("save".equals(cmd)) {
             if (parts.length>2)
@@ -143,13 +143,12 @@ public class Script {
             new Script(Paths.get(parts[1])).run();
         else if ("echo".equals(cmd)) {
             parts[0]="";
-            System.out.println(Env.props.substitute(String.join(" ",parts)));
+            String line=String.join(" ",parts).trim();
+            System.out.println(line);
         }
         else
             throw new RuntimeException("Unknown command "+cmd);
     }
-
-    private String substitute(String str) {return Env.props.substitute(str);}
 
     private void showVersion() {
         System.out.println("monkeysync version 1.0");
