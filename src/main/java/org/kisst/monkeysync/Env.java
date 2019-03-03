@@ -8,9 +8,11 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 
 public class Env {
+    static private final LinkedHashMap<String, Object> objects=new LinkedHashMap<>();
     static private final LinkedHashMap<String, Table> tables=new LinkedHashMap<>();
     static public final Props props=new Props();
     static public int verbosity=1;
+    static public int memoryLevel=1;
     static public boolean interactive=false;
     static public boolean enableDeleteMissingRecords =false;
 
@@ -19,21 +21,18 @@ public class Env {
         props.loadProps(p);
     }
 
-    public static void warn(String msg) {
-        System.out.println("WARNING: "+msg);
+
+    static public void warn(String msg, Object... params) {
+        output("WARNING",0, msg,params);
     }
-    static public void info(String s, String key) {
-        if (verbosity>=1)
-            System.out.println(s+key);
+    static public void info(String msg, Object... params) {
+        output("INFO",1, msg, params);
     }
-    static public void verbose(String s, String key) {
-        if (verbosity>=2)
-            System.out.println(s+key);
+    static public void verbose(String msg, Object... params) { output("TRACE",2, msg, params);    }
+    static public void debug(String msg, Object... params) {
+        output("DEBUG",3, msg, params);
     }
-    static public void debug(String s, Object data) {
-        if (verbosity>=3)
-            System.out.println(s+data);
-    }
+
     static public boolean ask(String s) {
         if (interactive) {
             System.out.println(s);
@@ -43,6 +42,32 @@ public class Env {
         }
         return true;
     }
+
+    static private void output(String levelname, int level, String line, Object... parms) {
+        if (verbosity<level && memoryLevel<level)
+            return;
+        for (Object parm:parms) {
+            if (parm != null)
+                line += " " + parm;
+        }
+        if (verbosity>=level)
+            System.out.println(line);
+        if (memoryLevel< level) {
+            StringBuilder buffer=getBuffer(levelname);
+            buffer.append(line+"\n");
+        }
+    }
+
+    private static StringBuilder getBuffer(String levelname) {
+        StringBuilder result= (StringBuilder) getObject(levelname);
+        if (result==null) {
+            result=new StringBuilder();
+            objects.put(levelname, result);
+        }
+        return result;
+    }
+    public static Object getObject(String name) { return objects.get(name);}
+
 
     static public Table getTable(String name) {
         if (tables.get(name)==null) {
