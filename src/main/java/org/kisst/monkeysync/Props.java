@@ -63,6 +63,15 @@ public class Props {
         return result;
     }
 
+    public String[] getStrings(String name) {
+        String values=getString(name, null);
+        if (values==null)
+            throw new IllegalArgumentException("no property with name "+name);
+        String[] list=values.split(",");
+        for (int i=0; i<list.length; i++)
+            list[i]=list[i].trim();
+        return list;
+    }
     public Set<String> keySet() { return props.keySet(); }
 
     public Props getProps(String prefix) {

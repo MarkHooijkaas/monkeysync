@@ -138,7 +138,7 @@ public class Script {
         else if ("syncDeleteMissing".equals(cmd))
             new Syncer().deleteMissingRecords(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("mail".equals(cmd))
-            Mail.send(Arrays.copyOfRange(parts,1,parts.length));
+            Mail.send(Env.props.getProps(parts[1]));
         else if ("run".equals(cmd))
             new Script(Paths.get(parts[1])).run();
         else if ("echo".equals(cmd)) {
