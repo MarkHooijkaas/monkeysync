@@ -12,6 +12,12 @@ public class StringUtil {
             if (pos2<0)
                 throw new RuntimeException("Unbounded ${ starting with "+str.substring(pos,pos+10));
             String key=str.substring(pos+2,pos2);
+            String defaultValue=null;
+            int posColon=key.indexOf(':');
+            if (posColon>0) {
+                defaultValue=key.substring(posColon+1);
+                key=key.substring(0,posColon);
+            }
             result.append(str.substring(prevpos,pos));
             String value=null;
             for (Map<String,?> m: maps) {
@@ -25,6 +31,8 @@ public class StringUtil {
                 value="$";
             if (value==null && key.startsWith("env."))
                 value=System.getenv(key.substring(4));
+            if (value==null)
+                value=defaultValue;
             if (value==null)
                 throw new RuntimeException("Unknown variable ${"+key+"}");
             result.append(value.toString());
