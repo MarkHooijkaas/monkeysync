@@ -2,7 +2,7 @@
 .gradle
 build
 data/
-config/
+config
 out/
-sql
-monkeysync.props
+
+
