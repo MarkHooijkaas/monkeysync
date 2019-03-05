@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'org.kisst'
-version '1.0'
+version 'latest'
 
 sourceCompatibility = 1.8
 
@@ -22,7 +22,7 @@ task fatJar(type: Jar) {
                 'Main-Class': 'org.kisst.monkeysync.SyncCli'
     }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
-    baseName = project.name + '-all'
+    baseName = project.name + '-fat'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }

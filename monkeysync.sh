@@ -1,2 +1,2 @@
 #!/bin/sh
-java -jar build/libs/monkeysync-all-*.jar $*
+java -jar build/libs/monkeysync-fat-latest.jar $*
