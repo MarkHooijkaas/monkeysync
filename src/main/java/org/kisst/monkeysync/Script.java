@@ -137,7 +137,7 @@ public class Script {
             new Syncer().deleteInactiveRecords(Env.getTable(parts[1]),Env.getTable(parts[2]));
         else if ("syncDeleteMissing".equals(cmd))
             new Syncer().deleteMissingRecords(Env.getTable(parts[1]),Env.getTable(parts[2]));
-        else if ("mail".equals(cmd))
+        else if ("send".equals(cmd))
             Mail.send(Env.props.getProps(parts[1]));
         else if ("run".equals(cmd))
             new Script(Paths.get(parts[1])).run();
@@ -175,6 +175,7 @@ public class Script {
                 "  load <name> [<file>] load a named table from <file>, or the default file\n" +
                 "  save <name> [<file>] save a table with <name> to <file> or the default file\n" +
                 "  sync <name1> <name2> sync table <name1> to table <name2>\n" +
+                "  send <name>          send email with settings from <name>\n" +
                 "  syncCreate ...       sync only new records\n" +
                 "  syncUpdate ...       sync only existing records\n" +
                 "  syncDelete ...       sync only records that are marked as deleted in src\n" +
