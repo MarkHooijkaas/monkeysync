@@ -12,7 +12,7 @@ public class Env {
     static private final LinkedHashMap<String, Table> tables=new LinkedHashMap<>();
     static public final Props props=new Props();
     static public int verbosity=1;
-    static public int memoryLevel=1;
+    static public int memoryLevel=2;
     static public boolean interactive=false;
     static public boolean enableDeleteMissingRecords =false;
 
@@ -23,7 +23,7 @@ public class Env {
 
 
     static public void warn(String msg, Object... params) {
-        output("WARNING",0, msg,params);
+        output("WARN",0, msg,params);
     }
     static public void info(String msg, Object... params) {
         output("INFO",1, msg, params);
