@@ -14,7 +14,6 @@ public class Env {
     static public int verbosity=1;
     static public int memoryLevel=2;
     static public boolean interactive=false;
-    static public boolean enableDeleteMissingRecords =false;
 
     static public void loadProps(Path p) {
         info("loading props from: ",p.toString());
@@ -112,4 +111,9 @@ public class Env {
         return StringUtil.substitute(str, props.props, objects, tables);
     }
 
+    public static void clear() {
+        objects.clear();
+        tables.clear();
+        // TODO: set props to initial state;
+    }
 }

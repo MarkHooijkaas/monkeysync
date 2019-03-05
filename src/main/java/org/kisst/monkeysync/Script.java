@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.TimerTask;
 import java.util.stream.Stream;
 
-public class Script {
+public class Script extends TimerTask {
     private final Stream<String> lines;
 
     public Script(Path path) {
@@ -22,6 +22,7 @@ public class Script {
     }
 
     public void run() {
+        Env.clear();
         int linenr=0;
         lines.forEach(this::parse);
     }
