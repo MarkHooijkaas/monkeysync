@@ -48,15 +48,15 @@ public class MailchimpConnector {
             builder.delete();
         else
             builder.method(method, RequestBody.create(JSON, data));
-        Env.verbose(method + ": " + urlpart, data);
+        Env.debug(method + ": " + urlpart, data);
 
         try (Response response = client.newCall(builder.build()).execute()) {
             String body=response.body().string();
             if (response.code()!=200 && response.code()!=204) {// 204 Means "no content", and is returned after a succesfull DELETE
                 if (continueOnError)
-                    System.err.println("HTTP ERROR: " + response+body);
+                    Env.warn("HTTP ERROR: " ,response,body, "when handling", method, data);
                 else
-                    throw new RuntimeException("HTTP ERROR: " + response+body);
+                    throw new RuntimeException("HTTP ERROR: " + response+body+method+data);
             }
             else
                 Env.debug("response: ", response.toString());

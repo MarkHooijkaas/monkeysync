@@ -45,10 +45,10 @@ public class Syncer {
                 continue;
             }
             if (destTable.mayCreateRecord(key)) {
+                Env.verbose("creating ", key, src);
                 if (Env.ask("About to create "+key)) {
                     if (! dryRun)
                         destTable.create(src);
-                    Env.verbose("created ", src.getKey());
                     count++;
                 }
             }
@@ -92,10 +92,10 @@ public class Syncer {
                 }
                 // System.out.println(diffs.size()+" for "+dest.getKey());
                 if (diffs.size()>0) {
-                    if (Env.ask("About to merge "+key+diffs)) {
+                    Env.verbose("merging: ", key, diffs);
+                    if (Env.ask("About to merge "+key)) {
                         if (! dryRun)
                             destTable.update(dest, diffs);
-                        Env.verbose("merging: ", key + diffs);
                         count++;
                     }
                 }
@@ -126,10 +126,10 @@ public class Syncer {
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
             if (srcTable.isDeleteDesired(src) && destTable.mayDeleteRecord(key)) {
+                Env.verbose("deleting ", key);
                 if (Env.ask("About to delete "+key)) {
                     if (! dryRun)
                         destTable.delete(src);
-                    Env.verbose("deleted ", src.getKey());
                     count++;
                 }
             }
@@ -146,10 +146,10 @@ public class Syncer {
             for (Record dest : destTable.records()) {
                 final String key = dest.getKey();
                 if (destTable.mayDeleteRecord(key) && !srcTable.recordExists(key)) {
+                    Env.verbose("deleting missing record ", key);
                     if (Env.ask("About to delete "+key)) {
                         if (! dryRun)
                             destTable.delete(dest);
-                        Env.verbose("deleted record which does not exist at source ", key);
                         count++;
                     }
 

@@ -39,4 +39,5 @@ public class MailchimpRecord implements Record {
     @Override public String getField(String name) { return merge_fields.get(name);}
     @Override public void setField(String name, String value) { merge_fields.put(name, value); }
 
+    @Override public String toString() { return email_address+merge_fields;}
 }

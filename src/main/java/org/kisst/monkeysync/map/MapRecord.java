@@ -34,5 +34,7 @@ public class MapRecord implements Record {
     @Override public Iterable<String> fieldNames() { return fields.keySet();}
     @Override public String getField(String name) { return fields.get(name);}
     @Override public void   setField(String name, String value) { fields.put(name, value);}
+    @Override public String toString() { return key+fields;}
+
 
 }

@@ -121,7 +121,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void create(Record srcrec) {
         super.create(srcrec);
-        Env.verbose("Create: "+srcrec.getKey(),srcrec.toJson());
+        Env.debug("Create: "+srcrec.getKey(),srcrec.toJson());
         if (modifyMailchimp)
             connector.createMember(srcrec.getKey(), getRecord(srcrec.getKey()).toJson()); // TODO: ugly construct
     }
@@ -134,7 +134,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void delete(Record destrec) {
         super.delete(destrec);
-        Env.verbose("Delete: ",destrec.getKey());
+        Env.debug("Delete: ",destrec.getKey());
         if (modifyMailchimp) {
             if (useUnsubscribe)
                 connector.unsubscribeMember(destrec.getKey(), clearAllOnUnsubscribe);
