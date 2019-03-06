@@ -109,6 +109,8 @@ public class MailchimpConnector {
         MailchimpMemberResponse respons;
         int max_item=offset+count;
         do {
+            if (Env.verbosity>0)
+                System.out.print(".");
             String httpresult = getMembers(offset, Math.min(count,pagesize), urlOptions);
             Env.debug(httpresult, "");
             respons =gson.fromJson(httpresult,MailchimpMemberResponse.class);

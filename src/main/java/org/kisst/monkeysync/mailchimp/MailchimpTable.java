@@ -51,6 +51,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
             retrieveMembersSince(retrieveSince);
             autoSave();
         }
+        Env.info("records after fetch ",records.size());
     }
 
 

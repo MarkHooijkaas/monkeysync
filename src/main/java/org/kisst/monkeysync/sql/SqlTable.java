@@ -62,6 +62,7 @@ public class SqlTable extends MapTable {
         }
         catch (SQLException e) { throw new RuntimeException(e); }
         autoSave();
+        Env.info("records after fetch ",records.size());
     }
 
     private Connection connect(Props props) {
