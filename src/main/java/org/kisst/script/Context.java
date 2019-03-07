@@ -8,6 +8,7 @@ import org.kisst.monkeysync.PropsLayer;
 import org.kisst.monkeysync.StringUtil;
 
 import java.util.HashMap;
+import java.util.Stack;
 
 public class Context {
     public final static Level VERBOSE = Level.forName("VERBOSE", 350);
@@ -17,7 +18,7 @@ public class Context {
     private static final Logger logger=LogManager.getLogger();
     private final HashMap<String, Object> vars=new HashMap<>();
     protected final Context parent;
-    private Level verbosity=Level.INFO;
+    private Level verbosity=Level.DEBUG;
     private Level memoryLevel=Level.DEBUG;
     private final Language language;
     private final String name;
@@ -99,5 +100,30 @@ public class Context {
                 return false;
         }
         return true;
+    }
+
+    private static ThreadLocal<Stack<Context>> contextStack = new ThreadLocal<>();
+    public static void pushContext(Context ctx) {
+        Stack<Context> stack=contextStack.get();
+        if (stack==null) {
+            stack = new Stack<>();
+            contextStack.set(stack);
+        }
+        stack.push(ctx);
+    }
+    public static Context getThreadContext() {
+        Stack<Context> stack=contextStack.get();
+        if (stack==null)
+            return null;
+        return stack.peek();
+    }
+    public static Context popContext() {
+        Stack<Context> stack=contextStack.get();
+        if (stack==null)
+            return null;
+        Context result = stack.peek();
+        if (stack.empty())
+            contextStack.remove();
+        return result;
     }
 }

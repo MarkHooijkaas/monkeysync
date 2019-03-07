@@ -1,7 +1,6 @@
 package org.kisst.script;
 
 import java.io.Serializable;
-import java.util.Stack;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -16,31 +15,6 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 @Plugin(name="BufferAppender", category="Core", elementType="appender", printObject=true)
 public final class BufferAppender extends AbstractAppender {
-    private static ThreadLocal<Stack<Context>> contextStack = new ThreadLocal<>();
-    public static void pushContext(Context ctx) {
-        Stack<Context> stack=contextStack.get();
-        if (stack==null) {
-            stack = new Stack<>();
-            contextStack.set(stack);
-        }
-        stack.push(ctx);
-    }
-    public static Context getContext() {
-        Stack<Context> stack=contextStack.get();
-        if (stack==null)
-            return null;
-        return stack.peek();
-    }
-    public static Context popContext() {
-        Stack<Context> stack=contextStack.get();
-        if (stack==null)
-            return null;
-        Context result = stack.peek();
-        if (stack.empty())
-            contextStack.remove();
-        return result;
-    }
-
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Lock readLock = rwLock.readLock();
 
@@ -54,7 +28,8 @@ public final class BufferAppender extends AbstractAppender {
         readLock.lock();
         try {
             final byte[] bytes = getLayout().toByteArray(event);
-            Context ctx=getContext();
+            Context ctx=Context.getThreadContext();
+
             if (ctx!=null)
                 System.out.print(ctx.getName()+": ");
             System.out.write(bytes);

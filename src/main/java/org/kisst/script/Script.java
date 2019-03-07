@@ -27,12 +27,12 @@ public class Script {
     public void run(Context parent) {
         for (Step s: steps) {
             Context ctx=parent.createSubContext(s.toString());
-            BufferAppender.pushContext(ctx);
+            Context.pushContext(ctx);
             try {
                 ctx.info("*** {}", s);
                 s.run(ctx);
             }
-            finally { BufferAppender.popContext();}
+            finally { Context.popContext();}
         }
     }
 

@@ -34,7 +34,7 @@ public class Language {
             ctx=new Context(this);
         else
             ctx=new Context(parent,"compile");
-        BufferAppender.pushContext(ctx);
+        Context.pushContext(ctx);
         try {
             ArrayList<Script.Step> steps = new ArrayList<>();
             lines.forEach((line) -> {
@@ -44,7 +44,7 @@ public class Language {
             });
             return new Script(ctx, steps);
         }
-        finally { BufferAppender.popContext();}
+        finally { Context.popContext();}
      }
 
     public Script compile(Context parent, Path path) {
