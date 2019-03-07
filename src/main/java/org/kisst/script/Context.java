@@ -71,4 +71,20 @@ public class Context {
         return StringUtil.substitute(str, props.props, vars);
     }
 
+    static public void sleep(long msecs) {
+        try {
+            Thread.sleep(msecs);
+        }
+        catch (InterruptedException e1) { throw new RuntimeException(e1);}
+    }
+
+    static public boolean ask(String s) {
+        if (false) {//interactive) {
+            System.out.println(s);
+            String line=System.console().readLine();
+            if (line.trim().toLowerCase().startsWith("n"))
+                return false;
+        }
+        return true;
+    }
 }

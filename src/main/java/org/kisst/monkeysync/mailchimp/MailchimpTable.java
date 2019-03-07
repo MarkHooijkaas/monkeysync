@@ -1,14 +1,10 @@
 package org.kisst.monkeysync.mailchimp;
 
-import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.map.BaseTable;
 import org.kisst.script.Context;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -46,13 +42,13 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
     @Override  public void fetch(Context ctx) {
         if (this.retrieveAll) {
             retrieveAll();
-            autoSave();
+            autoSave(ctx);
         }
         if (this.retrieveSince!=null) {
             retrieveMembersSince(retrieveSince);
-            autoSave();
+            autoSave(ctx);
         }
-        Env.info("records after fetch ",records.size());
+        ctx.info("fetched {} records ",records.size());
     }
 
 
@@ -123,7 +119,6 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void create(Record srcrec) {
         super.create(srcrec);
-        Env.debug("Create: "+srcrec.getKey(),srcrec.toJson());
         if (modifyMailchimp)
             connector.createMember(srcrec.getKey(), getRecord(srcrec.getKey()).toJson()); // TODO: ugly construct
     }
@@ -136,7 +131,6 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
 
     @Override public void delete(Record destrec) {
         super.delete(destrec);
-        Env.debug("Delete: ",destrec.getKey());
         if (modifyMailchimp) {
             if (useUnsubscribe)
                 connector.unsubscribeMember(destrec.getKey(), clearAllOnUnsubscribe);

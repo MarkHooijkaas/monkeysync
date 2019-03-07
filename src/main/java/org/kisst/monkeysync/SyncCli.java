@@ -1,5 +1,8 @@
 package org.kisst.monkeysync;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kisst.script.Context;
 import org.kisst.script.Script;
 
@@ -11,6 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class SyncCli {
+    private static Logger logger= LogManager.getLogger();
     private static MonkeyLanguage lang=new MonkeyLanguage();
 
     public static void main(String... args) {
@@ -22,7 +26,7 @@ public class SyncCli {
             if (arg.equals("-c")||arg.equals("--config"))
                 configFound=true;
             if (arg.equals("-q")||arg.equals("--quiet"))
-                Env.verbosity=0; // turn off logging to prevent showing the loading config message
+                ctx.setLoglevel(Level.WARN); // turn off logging to prevent showing the loading config message
             if (arg.indexOf(",")>=0)
                 break;
         }
@@ -37,7 +41,7 @@ public class SyncCli {
         Script script =lang.compile(ctx, str);
         ctx.info("compiled to {}",script.toString());
 
-        String schedule=Env.props.getString("script.schedule",null);
+        String schedule=ctx.props.getString("script.schedule",null);
         if (schedule==null)
             script.run();
         else
@@ -65,7 +69,7 @@ public class SyncCli {
         while (ldt.isBefore(now))
             ldt=ldt.plusSeconds(period);
         Date start = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        Env.info("Starting script at", start, "with interval", period, "seconds");
+        logger.info("Starting script at {} with interval {} seconds", start, period);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override public void run() { script.run(); }
         }, start, period * 1000);

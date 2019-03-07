@@ -2,8 +2,10 @@ package org.kisst.monkeysync.mailchimp;
 
 import com.google.gson.Gson;
 import okhttp3.*;
-import org.kisst.monkeysync.Env;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kisst.monkeysync.Props;
+import org.kisst.script.Context;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
@@ -16,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 public class MailchimpConnector {
+    private static final Logger logger= LogManager.getLogger();
+
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private final String baseurl;
@@ -53,7 +57,7 @@ public class MailchimpConnector {
             builder.delete();
         else
             builder.method(method, RequestBody.create(JSON, data));
-        Env.debug(method + ": " + urlpart, data);
+        logger.debug("{}: {} {}", method, urlpart, data);
 
         int tries=0;
         while (true) {
@@ -61,19 +65,19 @@ public class MailchimpConnector {
                 String body = response.body().string();
                 if (response.code() != 200 && response.code() != 204) {// 204 Means "no content", and is returned after a succesfull DELETE
                     if (continueOnError)
-                        Env.warn("HTTP ERROR: ", response, body, "when handling", method, data);
+                        logger.warn("HTTP ERROR: {} {} when handling {} {}", response, body, method, data);
                     else
                         throw new RuntimeException("HTTP ERROR: " + response + body + method + data);
                 } else
-                    Env.debug("response: ", response.toString());
+                    logger.debug("response: {}", response);
                 return body;
             }
             catch (UnknownHostException e) {
                 tries++;
                 if (tries>=unknownHostExceptionTries)
                     throw new RuntimeException(e);
-                Env.warn("UnknownHostException occurred, will automatically retry in "+unknownHostExceptionRetryInterval+" secs");
-                Env.sleep(unknownHostExceptionRetryInterval*1000);
+                logger.warn("UnknownHostException occurred, will automatically retry in {} seconds",unknownHostExceptionRetryInterval);
+                Context.sleep(unknownHostExceptionRetryInterval*1000);
             }
             catch (IOException e) {throw new RuntimeException(e);}
         }
@@ -124,10 +128,10 @@ public class MailchimpConnector {
         MailchimpMemberResponse respons;
         int max_item=offset+count;
         do {
-            if (Env.verbosity>0)
-                System.out.print(".");
+            //if (ctx.verbosity>0)
+            //    System.out.print(".");
             String httpresult = getMembers(offset, Math.min(count,pagesize), urlOptions);
-            Env.debug(httpresult, "");
+            logger.debug("httpresult: {}", httpresult);
             respons =gson.fromJson(httpresult,MailchimpMemberResponse.class);
             count-=pagesize;
             offset+=pagesize;
@@ -157,6 +161,4 @@ public class MailchimpConnector {
         }
         catch (NoSuchAlgorithmException e) { throw new RuntimeException(e); }
     }
-
-
 }

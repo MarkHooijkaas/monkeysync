@@ -1,7 +1,11 @@
 package org.kisst.monkeysync.map;
 
 import com.google.gson.Gson;
-import org.kisst.monkeysync.*;
+import org.kisst.monkeysync.CachedObject;
+import org.kisst.monkeysync.Props;
+import org.kisst.monkeysync.Record;
+import org.kisst.monkeysync.Table;
+import org.kisst.script.Context;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -102,12 +106,12 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
 
     protected final static Gson gson = new Gson();
 
-    @Override public void load() {
+    @Override public void load(Context ctx) {
         if (file==null)
             throw new IllegalArgumentException("No file configured to load table");
-        load(file);
+        load(ctx, file);
     }
-    public void load(String filename) {
+    public void load(Context ctx, String filename) {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -119,19 +123,19 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        Env.info("loaded "+records.size()+" from", filename);
+        ctx.info("loaded {} records from {}",records.size(), filename);
     }
 
-    public void autoSave() {
+    @Override public void autoSave(Context ctx) {
         if (autoSave && file!=null)
-          save(file);
+          save(ctx, file);
     }
-    @Override public void save() {
+    @Override public void save(Context ctx) {
         if (file==null)
             throw new IllegalArgumentException("No file configured to save table");
-        save(file);
+        save(ctx, file);
     }
-    @Override public void save(String filename) {
+    @Override public void save(Context ctx, String filename) {
         try (FileWriter file = new FileWriter(filename)) {
             for (Record rec: records.values()) {
                 file.write(rec.toJson());
@@ -139,10 +143,10 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        Env.info("Saved "+records.size()+" records to ",filename);
+        ctx.info("Saved {} records to {}",records.size(),filename);
     }
 
-    public void saveTabDelimited(String filename) {
+    public void saveTabDelimited(Context ctx, String filename) {
         try (FileWriter file = new FileWriter(filename)) {
             for (Record rec: records.values()) {
                 String sep="";
@@ -159,6 +163,6 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        Env.info("Saved "+records.size()+" records to ",filename);
+        ctx.info("Saved {} records to {}",records.size(),filename);
     }
 }

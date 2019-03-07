@@ -1,6 +1,5 @@
 package org.kisst.monkeysync.sql;
 
-import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.map.MapRecord;
 import org.kisst.monkeysync.map.MapTable;
@@ -65,8 +64,8 @@ public class SqlTable extends MapTable {
             }
         }
         catch (SQLException e) { throw new RuntimeException(e); }
-        autoSave();
-        Env.info("records after fetch ",records.size());
+        autoSave(ctx);
+        ctx.info("fetched {} records",records.size());
     }
 
     private Connection connect(Props props) {
