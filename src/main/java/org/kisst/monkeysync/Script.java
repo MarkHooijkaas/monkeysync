@@ -64,15 +64,13 @@ public class Script extends TimerTask {
                     throw e;
                 Env.warn("Retrying "+cmd+" because it failed with error "+e.getMessage());
                 if (retryInterval>0) {
-                    try {
-                        Env.info("sleeping before retry","");
-                        Thread.sleep(retryInterval);
-                    }
-                    catch (InterruptedException e1) { throw new RuntimeException(e1);}
+                    Env.info("sleeping before retry");
+                    Env.sleep(retryInterval);
                 }
             }
         }
     }
+
 
     private boolean parseOption(String[] parts, int i) {
         String option=parts[i];

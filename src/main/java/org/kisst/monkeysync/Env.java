@@ -116,4 +116,12 @@ public class Env {
         tables.clear();
         // TODO: set props to initial state;
     }
+
+    static public void sleep(long msecs) {
+        try {
+            Thread.sleep(msecs);
+        }
+        catch (InterruptedException e1) { throw new RuntimeException(e1);}
+    }
+
 }

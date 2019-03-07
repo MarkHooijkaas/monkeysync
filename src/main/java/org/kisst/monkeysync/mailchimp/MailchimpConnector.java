@@ -7,6 +7,7 @@ import org.kisst.monkeysync.Props;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -21,12 +22,16 @@ public class MailchimpConnector {
     private final String apikey;
     private final String listid;
     private final boolean continueOnError;
+    private final int unknownHostExceptionTries;
+    private final long unknownHostExceptionRetryInterval;
 
     public MailchimpConnector(Props props) {
         this.listid=props.getString("listid");
         this.baseurl = props.getString("url")+"lists/"+listid;
         this.apikey=props.getString("apikey");
         this.continueOnError=props.getBoolean("continueOnError", false);
+        this.unknownHostExceptionTries = props.getInt("unknownHostExceptionTries",10);
+        this.unknownHostExceptionRetryInterval = props.getInt("unknownHostExceptionRetryInterval",60);
     }
 
 
@@ -50,18 +55,28 @@ public class MailchimpConnector {
             builder.method(method, RequestBody.create(JSON, data));
         Env.debug(method + ": " + urlpart, data);
 
-        try (Response response = client.newCall(builder.build()).execute()) {
-            String body=response.body().string();
-            if (response.code()!=200 && response.code()!=204) {// 204 Means "no content", and is returned after a succesfull DELETE
-                if (continueOnError)
-                    Env.warn("HTTP ERROR: " ,response,body, "when handling", method, data);
-                else
-                    throw new RuntimeException("HTTP ERROR: " + response+body+method+data);
+        int tries=0;
+        while (true) {
+            try (Response response = client.newCall(builder.build()).execute()) {
+                String body = response.body().string();
+                if (response.code() != 200 && response.code() != 204) {// 204 Means "no content", and is returned after a succesfull DELETE
+                    if (continueOnError)
+                        Env.warn("HTTP ERROR: ", response, body, "when handling", method, data);
+                    else
+                        throw new RuntimeException("HTTP ERROR: " + response + body + method + data);
+                } else
+                    Env.debug("response: ", response.toString());
+                return body;
             }
-            else
-                Env.debug("response: ", response.toString());
-            return body;
-        } catch (IOException e) { throw new RuntimeException(e);}
+            catch (UnknownHostException e) {
+                tries++;
+                if (tries>=unknownHostExceptionTries)
+                    throw new RuntimeException(e);
+                Env.warn("UnknownHostException occurred, will automatically retry in "+unknownHostExceptionRetryInterval+" secs");
+                Env.sleep(unknownHostExceptionRetryInterval*1000);
+            }
+            catch (IOException e) {throw new RuntimeException(e);}
+        }
     }
 
     public void createMember(String email, String json) {
