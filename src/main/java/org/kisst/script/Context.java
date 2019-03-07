@@ -16,20 +16,34 @@ public class Context {
 
     private static final Logger logger=LogManager.getLogger();
     private final HashMap<String, Object> vars=new HashMap<>();
-    private int verbosity=Level.INFO.intLevel();
+    protected final Context parent;
+    private Level verbosity=Level.INFO;
     private Level memoryLevel=Level.DEBUG;
     private final Language language;
+    private final String name;
 
     public Context(Language language) {
+        this.parent=null;
         this.language=language;
         this.props=new Props();
+        this.name=language.getClass().getSimpleName();
     }
-    public Context(Context parent) {
+    public Context(Context parent, String name) {
+        this.parent=parent;
         this.language=parent.language;
         this.props=new PropsLayer(parent.props);
         this.verbosity=parent.verbosity;
+        this.name=name;
     }
 
+    public static class SubContext extends Context {
+        private SubContext(Context parent, String name) { super(parent, name); }
+        @Override public void setVar(String name, Object val) { this.parent.setVar(name, val);}
+    }
+    public SubContext createSubContext(String name) { return new SubContext(this, name); }
+
+    public String getName() { return name;}
+    public String getFullName() {return parent==null? name: parent.getFullName()+"."+name; }
     public Object getVar(String name) { return vars.get(name);}
     public void setVar(String name, Object val) { vars.put(name, val);}
 
@@ -43,9 +57,8 @@ public class Context {
 
 
     private void output(Level level, String msg, Object... parms) {
-        if (verbosity<level.intLevel()) // && memoryLevel<level)
-            return;
-        logger.log(level,msg, parms);
+        if (true) //verbosity.isMoreSpecificThan(level)) // && memoryLevel<level)
+            logger.log(level,msg, parms);
         //logger.printf(level, msg, parms);
         if (memoryLevel.isMoreSpecificThan(level)) {
             StringBuilder buffer=getBuffer(level);
@@ -63,7 +76,7 @@ public class Context {
         return result;
     }
 
-    public void setLoglevel(Level level) { this.verbosity=level.intLevel(); }
+    public void setLoglevel(Level level) { this.verbosity=level; }
 
     public Language getLanguage() { return this.language; }
 

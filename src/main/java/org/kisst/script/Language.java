@@ -33,14 +33,18 @@ public class Language {
         if (parent==null)
             ctx=new Context(this);
         else
-            ctx=new Context(parent);
-        ArrayList<Script.Step> steps=new ArrayList<>();
-        lines.forEach((line) -> {
-            Script.Step step = parse(ctx, line);
-            if (step!=null)
-                steps.add(step);
-        });
-        return new Script(ctx, steps);
+            ctx=new Context(parent,"compile");
+        BufferAppender.pushContext(ctx);
+        try {
+            ArrayList<Script.Step> steps = new ArrayList<>();
+            lines.forEach((line) -> {
+                Script.Step step = parse(ctx, line);
+                if (step != null)
+                    steps.add(step);
+            });
+            return new Script(ctx, steps);
+        }
+        finally { BufferAppender.popContext();}
      }
 
     public Script compile(Context parent, Path path) {

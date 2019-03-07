@@ -23,11 +23,16 @@ public class Script {
         this.steps = steps;
     }
 
-    public void run() { run(new Context(compileContext)); }
-    public void run(Context ctx) {
+    public void run() { run(new Context(compileContext,"run")); }
+    public void run(Context parent) {
         for (Step s: steps) {
-            ctx.info("*** {}", s);
-            s.run(ctx);
+            Context ctx=parent.createSubContext(s.toString());
+            BufferAppender.pushContext(ctx);
+            try {
+                ctx.info("*** {}", s);
+                s.run(ctx);
+            }
+            finally { BufferAppender.popContext();}
         }
     }
 
