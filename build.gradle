@@ -1,11 +1,14 @@
 plugins {
     id 'java'
-}
+    id "nebula.lint" version "10.4.2"
+    }
 
 group 'org.kisst'
 version 'latest'
 
 sourceCompatibility = 1.8
+
+defaultTasks 'fatJar'
 
 repositories {
     mavenCentral()
