@@ -1,5 +1,7 @@
 package org.kisst.monkeysync;
 
+import org.kisst.script.Context;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -13,7 +15,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 
-public class Mail {
+public class Mailer {
 
     public static void sendFromGMail(Props props, String body) {
         String host = props.getString("host");
@@ -47,13 +49,13 @@ public class Mail {
         catch (MessagingException e) {throw new RuntimeException(e);}
     }
 
-    public static void send(Props props) {
+    public static void send(Context ctx, Props props) {
         String template;
         try {
             template = new String(Files.readAllBytes(Paths.get(props.getString("bodyTemplate"))));
         }
         catch (IOException e) { throw new RuntimeException(e); }
-        String body=Env.substitute(template);
+        String body=ctx.substitute(template);
         sendFromGMail(props, body);
     }
 }

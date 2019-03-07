@@ -9,7 +9,7 @@ import java.util.Properties;
 import java.util.Set;
 
 public class Props {
-    protected final LinkedHashMap<String,String> props=new LinkedHashMap<>();
+    public final LinkedHashMap<String,String> props=new LinkedHashMap<>();
 
     public String get(String key) {  return props.get(key);}
 

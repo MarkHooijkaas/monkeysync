@@ -7,8 +7,12 @@ import java.util.Date;
 import java.util.Timer;
 
 public class SyncCli {
+    private static MonkeyLanguage lang=new MonkeyLanguage();
 
     public static void main(String... args) {
+        lang.showHelp();
+        System.exit(0);
+
         // dirty hack to see if default configuration is needed
         boolean configFound=false;
         for (String arg: args) {

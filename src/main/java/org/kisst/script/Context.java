@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.PropsLayer;
+import org.kisst.monkeysync.StringUtil;
 
 import java.util.HashMap;
 
@@ -17,9 +18,16 @@ public class Context {
     private final HashMap<String, Object> vars=new HashMap<>();
     private int verbosity=Level.INFO.intLevel();
     private Level memoryLevel;
+    private final Language language;
 
-    public Context() { this.props=new Props();}
-    public Context(Context parent) { this.props=new PropsLayer(parent.props);}
+    public Context(Language language) {
+        this.language=language;
+        this.props=new Props();
+    }
+    public Context(Context parent) {
+        this.language=parent.language;
+        this.props=new PropsLayer(parent.props);
+    }
 
     public Object getVar(String name) { return vars.get(name);}
     public void setVar(String name, Object val) { vars.put(name, val);}
@@ -55,4 +63,11 @@ public class Context {
     }
 
     public void setLoglevel(Level level) { this.verbosity=level.intLevel(); }
+
+    public Language getLanguage() { return this.language; }
+
+    public String substitute(String str) {
+        return StringUtil.substitute(str, props.props, vars);
+    }
+
 }

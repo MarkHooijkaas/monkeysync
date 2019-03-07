@@ -7,18 +7,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.stream.Stream;
 
 public class Language {
     public interface Command {
-        Script.Step compile(Context ctx, String[] args);
+        Script.Step parse(Context ctx, String[] args);
         String getName();
-        //String getHelp();
+        String getHelp();
     }
 
     private final Language parent;
-    private final HashMap<String, Command>  commands=new HashMap<>();
+    private final LinkedHashMap<String, Command>  commands=new LinkedHashMap<>();
 
     public Language(Command ... commands) { this(null, commands); }
     public Language(Language parent, Command ... commands) {
@@ -29,7 +29,7 @@ public class Language {
 
 
     public Script compile(Stream<String> lines){
-        Context ctx=new Context();
+        Context ctx=new Context(this);
         ArrayList<Script.Step> steps=new ArrayList<>();
         lines.forEach((line) -> {
             Script.Step step = parse(ctx, line);
@@ -63,7 +63,7 @@ public class Language {
         Command cmd=commands.get(parts[0]);
         if (cmd==null)
             throw new UnsupportedOperationException(parts[0]);
-        return cmd.compile(ctx, parts);
+        return cmd.parse(ctx, parts);
     }
 
     private boolean parseOption(Context ctx, String[] parts, int i) {
@@ -95,6 +95,25 @@ public class Language {
     }
 
 
-    private void showHelp() {
+    public void showHelp() {
+        for (Command cmd: commands.values())
+            System.out.println(cmd.getHelp());
     }
+
+    /**
+     *     Helper method to extend languages using super constructor
+     *     The newCommands are of the Child class
+     *     The thisCommands are in the super class, but must be last parameter
+     *
+     */
+    public static Command[] join(Command[] newCommands, Command... thisCommands) {
+        Command[] result=new Command[thisCommands.length + newCommands.length];
+        int i=0;
+        for (Command cmd : thisCommands)
+            result[i++]=cmd;
+        for (Command cmd : newCommands)
+            result[i++]=cmd;
+        return result;
+    }
+
 }
