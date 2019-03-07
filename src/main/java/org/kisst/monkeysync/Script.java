@@ -93,7 +93,8 @@ public class Script extends TimerTask {
         else if ("-w".equals(option) || "--wet-run".equals(option))
             Env.props.parseLine("sync.dryRun=false");
         else if ("-c".equals(option) || "--config".equals(option)) {
-            Env.loadProps(Paths.get(parts[i+1]));
+            if (! "-".equals(parts[i+1]))
+                Env.loadProps(Paths.get(parts[i+1]));
             parts[i+1]="";
         }
         else if ("-n".equals(option) || "--null".equals(option) || "--no".equals(option) ) {
@@ -159,7 +160,7 @@ public class Script extends TimerTask {
     private void showHelp() {
         System.out.println(
                 "Usage: monkeysync <command> [<arg>|<option>]*\n" +
-                "  -c, --config <file>  load a config file (multiple files are allowed)\n" +
+                "  -c, --config <file>  load a config file (multiple files are allowed, - can skip default configfile)\n" +
                 "  -h, --help           show this help message and exit\n" +
                 "  -v, --verbose        if set, will output details\n" +
                 "  -d, --debug          if set, will output extra details\n" +
@@ -176,11 +177,11 @@ public class Script extends TimerTask {
                 "  load <name> [<file>] load a named table from <file>, or the default file\n" +
                 "  save <name> [<file>] save a table with <name> to <file> or the default file\n" +
                 "  sync <name1> <name2> sync table <name1> to table <name2>\n" +
-                "  send <name>          send email with settings from <name>\n" +
                 "  syncCreate ...       sync only new records\n" +
                 "  syncUpdate ...       sync only existing records\n" +
                 "  syncDelete ...       sync only records that are marked as deleted in src\n" +
-                "  syncDeleteMissing ...sync only records that are missing in src\n");
+                "  syncDeleteMissing ...sync only records that are missing in src\n" +
+                "  send <name>          send email with settings from <name>\n");
         System.exit(0);
     }
 
