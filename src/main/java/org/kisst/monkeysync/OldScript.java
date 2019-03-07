@@ -7,16 +7,16 @@ import java.nio.file.Paths;
 import java.util.TimerTask;
 import java.util.stream.Stream;
 
-public class Script extends TimerTask {
+public class OldScript extends TimerTask {
     private final Stream<String> lines;
 
-    public Script(Path path) {
+    public OldScript(Path path) {
         try {
             lines = Files.lines(path);
         } catch (IOException e) { throw new RuntimeException(e); }
     }
 
-    public Script(String str) {
+    public OldScript(String str) {
         String[] lines=str.split(",");
         this.lines=Stream.of(lines);
     }
@@ -140,7 +140,7 @@ public class Script extends TimerTask {
         else if ("send".equals(cmd))
             Mailer.send(null,Env.props.getProps(parts[1]));
         else if ("run".equals(cmd))
-            new Script(Paths.get(parts[1])).run();
+            new OldScript(Paths.get(parts[1])).run();
         else if ("echo".equals(cmd)) {
             parts[0]="";
             String line=String.join(" ",parts).trim();

@@ -1,5 +1,8 @@
 package org.kisst.monkeysync;
 
+import org.kisst.monkeysync.mailchimp.MailchimpTable;
+import org.kisst.monkeysync.map.MapTable;
+import org.kisst.monkeysync.sql.SqlTable;
 import org.kisst.script.Context;
 import org.kisst.script.GenericCommand;
 import org.kisst.script.BasicLanguage;
@@ -21,12 +24,16 @@ public class MonkeyLanguage extends BasicLanguage {
 
     public abstract static class TableStep implements Script.Step {
         private final String tblname;
+        private final String line;
         public TableStep(Context ctx,  String[] args) {
             if (args.length < 2)
                 throw new IllegalArgumentException(args[0]+" should have at least 1 parameter <table> [<file>]");
             this.tblname = args[1];
+            this.line=String.join(" ",args);
         }
         protected Table getTable(Context ctx){ return (Table) ctx.getVar(tblname);}
+        protected Table createTable(Context ctx){ return MonkeyLanguage.createTable(ctx,tblname);}
+        @Override public String toString() { return line;}
     }
 
     public static class Save extends TableStep {
@@ -58,7 +65,7 @@ public class MonkeyLanguage extends BasicLanguage {
         }
 
         @Override public void run(Context ctx) {
-            Table tbl = getTable(ctx);
+            Table tbl = createTable(ctx);
             if (file == null)
                 tbl.load();
             else
@@ -68,7 +75,7 @@ public class MonkeyLanguage extends BasicLanguage {
     public static class Fetch extends TableStep {
         public Fetch(Context ctx, String[] args) { super(ctx, args);}
         @Override public void run(Context ctx) {
-            getTable(ctx).fetch();
+            createTable(ctx).fetch(ctx);
         }
     }
 
@@ -119,5 +126,21 @@ public class MonkeyLanguage extends BasicLanguage {
         @Override public void run(Context ctx) {
             Mailer.send(ctx, ctx.props.getProps(name));
         }
+    }
+
+    static public Table createTable(Context ctx, String name) {
+        Props tblprops=ctx.props.getProps(name);
+        String type=tblprops.getString("type");
+        Table result;
+        if ("SqlTable".equals(type))
+            result=new SqlTable(ctx, tblprops);
+        else if ("MailchimpTable".equals(type))
+            result=new MailchimpTable(tblprops);
+        else if ("MapTable".equals(type))
+            result=new MapTable(tblprops);
+        else
+            throw new RuntimeException("Unknown table type "+type);
+        ctx.setVar(name, result);
+        return result;
     }
 }

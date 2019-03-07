@@ -17,7 +17,7 @@ public class Context {
     private static final Logger logger=LogManager.getLogger();
     private final HashMap<String, Object> vars=new HashMap<>();
     private int verbosity=Level.INFO.intLevel();
-    private Level memoryLevel;
+    private Level memoryLevel=Level.DEBUG;
     private final Language language;
 
     public Context(Language language) {
@@ -27,6 +27,7 @@ public class Context {
     public Context(Context parent) {
         this.language=parent.language;
         this.props=new PropsLayer(parent.props);
+        this.verbosity=parent.verbosity;
     }
 
     public Object getVar(String name) { return vars.get(name);}
@@ -45,7 +46,7 @@ public class Context {
         if (verbosity<level.intLevel()) // && memoryLevel<level)
             return;
         logger.log(level,msg, parms);
-        logger.printf(level, msg, parms);
+        //logger.printf(level, msg, parms);
         if (memoryLevel.isMoreSpecificThan(level)) {
             StringBuilder buffer=getBuffer(level);
             buffer.append(String.format(msg, parms)+"\n");

@@ -28,8 +28,12 @@ public class Language {
     }
 
 
-    public Script compile(Stream<String> lines){
-        Context ctx=new Context(this);
+    public Script compile(Context parent, Stream<String> lines){
+        Context ctx;
+        if (parent==null)
+            ctx=new Context(this);
+        else
+            ctx=new Context(parent);
         ArrayList<Script.Step> steps=new ArrayList<>();
         lines.forEach((line) -> {
             Script.Step step = parse(ctx, line);
@@ -39,22 +43,22 @@ public class Language {
         return new Script(ctx, steps);
      }
 
-    public Script compile(Path path) {
+    public Script compile(Context parent, Path path) {
         try {
-            return compile(Files.lines(path));
+            return compile(parent, Files.lines(path));
         } catch (IOException e) { throw new RuntimeException(e); }
     }
 
-    public Script compile(String line) {
+    public Script compile(Context ctx, String line) {
         String[] lines=line.split(",");
-        return compile(Stream.of(lines));
+        return compile(ctx, Stream.of(lines));
     }
 
     public Script.Step parse(Context ctx, String line) {
-        ctx.info("*** ", line.trim());
         line = line.trim();
         if (line.length() == 0 || line.startsWith("#"))
             return null;
+        ctx.info("compiling {}", line);
         String[] parts = line.split("\\s+");
         for (int i = 0; i < parts.length; i++) {
             if (parseOption(ctx, parts, i))

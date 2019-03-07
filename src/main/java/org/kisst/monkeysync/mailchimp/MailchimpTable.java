@@ -4,6 +4,7 @@ import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.map.BaseTable;
+import org.kisst.script.Context;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         this.deletePermanent=props.getBoolean("deletePermanent", false);
     }
 
-    @Override  public void fetch() {
+    @Override  public void fetch(Context ctx) {
         if (this.retrieveAll) {
             retrieveAll();
             autoSave();

@@ -107,8 +107,8 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             throw new IllegalArgumentException("No file configured to load table");
         load(file);
     }
-    public void load(String filenname) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filenname))) {
+    public void load(String filename) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
                 //System.out.println(line);
@@ -119,6 +119,7 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
+        Env.info("loaded "+records.size()+" from", filename);
     }
 
     public void autoSave() {
@@ -138,7 +139,7 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        Env.info("*** Saved "+records.size()+" records to ",filename);
+        Env.info("Saved "+records.size()+" records to ",filename);
     }
 
     public void saveTabDelimited(String filename) {
@@ -158,6 +159,6 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        Env.info("*** Saved "+records.size()+" records to ",filename);
+        Env.info("Saved "+records.size()+" records to ",filename);
     }
 }

@@ -4,6 +4,7 @@ import org.kisst.monkeysync.Env;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.map.MapRecord;
 import org.kisst.monkeysync.map.MapTable;
+import org.kisst.script.Context;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,15 +15,18 @@ import java.util.LinkedHashMap;
 
 
 public class SqlTable extends MapTable {
+    private final Props dbprops;
 
-    public SqlTable(Props props) { super(props); }
-
-    @Override public void fetch() {
-        final boolean trimValues=props.getBoolean("trimValues", true);
-
-        Props dbprops=props;
+    public SqlTable(Context ctx, Props props) {
+        super(props);
         if (props.getString("db",null)!=null)
-            dbprops= Env.props.getProps(props.getString("db"));
+            dbprops= ctx.props.getProps(props.getString("db"));
+        else
+            dbprops=props;
+    }
+
+    @Override public void fetch(Context ctx) {
+        final boolean trimValues=props.getBoolean("trimValues", true);
 
         String ignoreColumnsList=props.getString("ignoreColumns",null);
         HashSet<String> ignoreColumns=new HashSet<>();

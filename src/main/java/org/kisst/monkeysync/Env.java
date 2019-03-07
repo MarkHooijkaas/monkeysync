@@ -91,7 +91,7 @@ public class Env {
     }
     static public Table fetchTable(String name) {
         Table t=createTable(name);
-        t.fetch();
+        t.fetch(null);
         tables.put(name, t);
         return t;
     }
@@ -99,7 +99,7 @@ public class Env {
         Props tblprops=props.getProps(name);
         String type=tblprops.getString("type");
         if ("SqlTable".equals(type))
-            return new SqlTable(tblprops);
+            return new SqlTable(null, tblprops);
         if ("MailchimpTable".equals(type))
             return new MailchimpTable(tblprops);
         if ("MapTable".equals(type))

@@ -1,17 +1,20 @@
 package org.kisst.monkeysync;
 
+import org.kisst.script.Context;
+import org.kisst.script.Script;
+
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class SyncCli {
     private static MonkeyLanguage lang=new MonkeyLanguage();
 
     public static void main(String... args) {
-        lang.showHelp();
-        System.exit(0);
+        Context ctx=new Context(lang);
 
         // dirty hack to see if default configuration is needed
         boolean configFound=false;
@@ -23,13 +26,17 @@ public class SyncCli {
             if (arg.indexOf(",")>=0)
                 break;
         }
+        String str=String.join(" ", args);
         // load default config if not specified otherwise
         if (!configFound)
-            Env.loadProps(Paths.get("config/monkeysync.props"));
-        String str=String.join(" ", args);
+            ctx.props.loadProps(Paths.get("config/monkeysync.props"));
+
+
         if (str.trim().length()==0)
-            str=Env.props.getString("script.cmd");
-        Script script = new Script(str);
+            str=ctx.props.getString("script.cmd");
+        Script script =lang.compile(ctx, str);
+        ctx.info("compiled to {}",script.toString());
+
         String schedule=Env.props.getString("script.schedule",null);
         if (schedule==null)
             script.run();
@@ -59,6 +66,8 @@ public class SyncCli {
             ldt=ldt.plusSeconds(period);
         Date start = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
         Env.info("Starting script at", start, "with interval", period, "seconds");
-        timer.scheduleAtFixedRate(script, start, period*1000);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override public void run() { script.run(); }
+        }, start, period * 1000);
     }
 }

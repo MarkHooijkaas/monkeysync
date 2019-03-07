@@ -1,6 +1,7 @@
 package org.kisst.script;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Script {
@@ -26,8 +27,12 @@ public class Script {
     public void run() { run(new Context(compileContext)); }
     public void run(Context ctx) {
         for (Step s: steps) {
+            ctx.info("*** {}", s);
             s.run(ctx);
         }
     }
 
+    @Override public String toString() {
+        return Arrays.toString(steps);
+    }
 }
