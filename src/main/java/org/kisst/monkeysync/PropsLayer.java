@@ -4,9 +4,9 @@ import java.util.Set;
 
 public class PropsLayer extends Props {
     private static final String NULL=new String("@NULL@");
-    private final PropsLayer parent;
+    private final Props parent;
 
-    public PropsLayer(PropsLayer parent) {
+    public PropsLayer(Props parent) {
         assert (parent!=null);
         this.parent=parent;
     }
@@ -31,10 +31,10 @@ public class PropsLayer extends Props {
         return result;
     }
 
-    @Override public PropsLayer getProps(String prefix) {
+    @Override public Props getProps(String prefix) {
         if (! prefix.endsWith("."))
             prefix+=".";
-        PropsLayer result;
+        Props result;
         result=parent.getProps(prefix);
         for (String key: keySet()) {
             if (key.startsWith(prefix))
