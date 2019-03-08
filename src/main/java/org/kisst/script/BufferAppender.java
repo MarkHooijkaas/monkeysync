@@ -11,6 +11,7 @@ import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.appender.AppenderLoggingException;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.*;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
@@ -19,9 +20,12 @@ public final class BufferAppender extends AbstractAppender {
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Lock readLock = rwLock.readLock();
 
-    protected BufferAppender(String name, Filter filter,
-                             Layout<? extends Serializable> layout, final boolean ignoreExceptions) {
-        super(name, filter, layout, ignoreExceptions);
+    protected BufferAppender(String name,
+                             Filter filter,
+                             Layout<? extends Serializable> layout,
+                             final boolean ignoreExceptions,
+                             final Property[] properties) {
+        super(name, filter, layout, ignoreExceptions, properties);
     }
 
 
@@ -50,7 +54,8 @@ public final class BufferAppender extends AbstractAppender {
     public static BufferAppender createAppender(
             @PluginAttribute("name") String name,
             @PluginElement("Layout") Layout<? extends Serializable> layout,
-            @PluginElement("Filter") final Filter filter) {
+            @PluginElement("Filter") final Filter filter,
+            @PluginElement("Properties") final Property[] properties) {
             //@PluginAttribute("otherAttribute") String otherAttribute) {
         if (name == null) {
             LOGGER.error("No name provided for BufferAppender");
@@ -59,7 +64,7 @@ public final class BufferAppender extends AbstractAppender {
         if (layout == null) {
             layout = PatternLayout.createDefaultLayout();
         }
-        instance=new BufferAppender(name, filter, layout, true);
+        instance=new BufferAppender(name, filter, layout, true, properties);
         return instance;
     }
 }
