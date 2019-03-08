@@ -62,46 +62,36 @@ public class Language {
         return compile(ctx, Stream.of(lines));
     }
 
-    public Script.Step parse(Context ctx, String line) {
-        line = line.trim();
-        if (line.length() == 0 || line.startsWith("#"))
-            return null;
-        logger.info("compiling {}", line);
-        String[] parts = line.split("\\s+");
-        for (int i = 0; i < parts.length; i++) {
-            if (parseOption(ctx, parts, i))
-                parts[i] = "";
+    public Script.Step parse(Context parent, String line) {
+        Context ctx=parent.createSubContext(line);
+        Context.pushContext(ctx);
+        try {
+            line = line.trim();
+            if (line.length() == 0 || line.startsWith("#"))
+                return null;
+            logger.info("compiling {}", line);
+            String[] parts = line.split("\\s+");
+            for (int i = 0; i < parts.length; i++) {
+                if (parseOption(ctx, parts, i))
+                    parts[i] = "";
+            }
+            Command cmd = commands.get(parts[0]);
+            if (cmd == null)
+                throw new UnsupportedOperationException(parts[0]);
+            parts = String.join(" ", parts).split("\\s+");
+            return cmd.parse(ctx, parts);
         }
-        Command cmd=commands.get(parts[0]);
-        if (cmd==null)
-            throw new UnsupportedOperationException(parts[0]);
-        parts=String.join(" ",parts).split("\\s+");
-        return cmd.parse(ctx, parts);
+        finally { Context.popContext(); }
     }
 
     private boolean parseOption(Context ctx, String[] parts, int i) {
+        if (ctx.parseOption(parts,i))
+            return true;
         String option=parts[i];
         if ("-h".equals(option) || "--help".equals(option))
             showHelp();
         //else if ("-V".equals(option) || "--version".equals(option))
         //    showVersion();
-        else if ("-v".equals(option) || "--verbose".equals(option))
-            ctx.setLoglevel(Context.VERBOSE);
-        else if ("-q".equals(option) || "--quiet".equals(option))
-            ctx.setLoglevel(Level.WARN);
-        else if ("-d".equals(option) || "--debug".equals(option))
-            ctx.setLoglevel(Level.DEBUG);
-        else if ("-c".equals(option) || "--config".equals(option)) {
-            if (! "-".equals(parts[i+1]))
-                ctx.props.loadProps(Paths.get(parts[i+1]));
-            parts[i+1]="";
-        }
-        else if ("-n".equals(option) || "--null".equals(option) || "--no".equals(option) ) {
-            ctx.props.clearProp((parts[i+1]));
-            parts[i+1]="";
-        }
-        else if (option.startsWith("--") && option.indexOf("=")>0)
-            ctx.props.parseLine(option.substring(2));
         else
             return false;
         return true;
