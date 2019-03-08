@@ -3,6 +3,7 @@ package org.kisst.monkeysync;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.kisst.script.Config;
 import org.kisst.script.Context;
 import org.kisst.script.Script;
 
@@ -18,7 +19,7 @@ public class SyncCli {
     private static MonkeyLanguage lang=new MonkeyLanguage();
 
     public static void main(String... args) {
-        Context ctx=new Context(lang);
+        Config cfg=new Config(lang);
 
         // dirty hack to see if default configuration is needed
         boolean configFound=false;
@@ -26,22 +27,22 @@ public class SyncCli {
             if (arg.equals("-c")||arg.equals("--config"))
                 configFound=true;
             if (arg.equals("-q")||arg.equals("--quiet"))
-                ctx.setLoglevel(Level.WARN); // turn off logging to prevent showing the loading config message
+                cfg.setLoglevel(Level.WARN); // turn off logging to prevent showing the loading config message
             if (arg.indexOf(",")>=0)
                 break;
         }
         String str=String.join(" ", args);
         // load default config if not specified otherwise
         if (!configFound)
-            ctx.props.loadProps(Paths.get("config/monkeysync.props"));
+            cfg.props.loadProps(Paths.get("config/monkeysync.props"));
 
 
         if (str.trim().length()==0)
-            str=ctx.props.getString("script.cmd");
-        Script script =lang.compile(ctx, str);
+            str=cfg.props.getString("script.cmd");
+        Script script =lang.compile(cfg, str);
         logger.info("compiled to {}",script.toString());
 
-        String schedule=ctx.props.getString("script.schedule",null);
+        String schedule=cfg.props.getString("script.schedule",null);
         if (schedule==null)
             script.run();
         else

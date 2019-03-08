@@ -2,7 +2,10 @@ package org.kisst.monkeysync;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.kisst.script.BasicLanguage;
+import org.kisst.script.Config;
 import org.kisst.script.Context;
+import org.kisst.script.Script;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -17,8 +20,33 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 
-public class Mailer {
+public class Mailer extends BasicLanguage.BasicStep {
     private static final Logger logger= LogManager.getLogger();
+    private final String name;
+    private final String template;
+    private final Props mailprops;
+
+    public Mailer(Config cfg, String[] args) {
+        super(cfg);
+        if (args.length != 2)
+            throw new IllegalArgumentException(args[0]+" should have 1 parameter <mailcfg>");
+        this.name = args[1];
+        mailprops=cfg.props.getProps(name);
+        try {
+            template = new String(Files.readAllBytes(Paths.get(mailprops.getString("bodyTemplate"))));
+        }
+        catch (IOException e) { throw new RuntimeException(e); }
+    }
+
+    @Override public String toString() { return "send "+name;}
+
+    @Override public void run(Context ctx) {
+        String body=ctx.substitute(template);
+        if (! getConfig().dryRun)
+            sendFromGMail(mailprops, body);
+        logger.debug("sending mail\n{}", body);
+    }
+
 
     public static void sendFromGMail(Props props, String body) {
         String host = props.getString("host");
@@ -41,7 +69,7 @@ public class Mailer {
             for( int i = 0; i < to.length; i++)
                 message.addRecipient(Message.RecipientType.TO, new InternetAddress(to[i]));
 
-            message.setSubject(subject);
+           message.setSubject(subject);
             message.setText(body);
             Transport transport = session.getTransport("smtp");
             transport.connect(host, from, pass);
@@ -52,15 +80,4 @@ public class Mailer {
         catch (MessagingException e) {throw new RuntimeException(e);}
     }
 
-    public static void send(Context ctx, Props props) {
-        String template;
-        try {
-            template = new String(Files.readAllBytes(Paths.get(props.getString("bodyTemplate"))));
-        }
-        catch (IOException e) { throw new RuntimeException(e); }
-        String body=ctx.substitute(template);
-        if (! ctx.dryRun)
-            sendFromGMail(props, body);
-        logger.debug("sending mail {}", body);
-    }
 }

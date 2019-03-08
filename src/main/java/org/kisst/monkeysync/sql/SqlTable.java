@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.map.MapRecord;
 import org.kisst.monkeysync.map.MapTable;
+import org.kisst.script.Config;
 import org.kisst.script.Context;
 
 import java.io.IOException;
@@ -20,15 +21,15 @@ public class SqlTable extends MapTable {
 
     private final Props dbprops;
 
-    public SqlTable(Context ctx, Props props) {
+    public SqlTable(Config cfg, Props props) {
         super(props);
         if (props.getString("db",null)!=null)
-            dbprops= ctx.props.getProps(props.getString("db"));
+            dbprops= cfg.props.getProps(props.getString("db"));
         else
             dbprops=props;
     }
 
-    @Override public void fetch(Context ctx) {
+    @Override public void fetch() {
         final boolean trimValues=props.getBoolean("trimValues", true);
 
         String ignoreColumnsList=props.getString("ignoreColumns",null);
@@ -68,7 +69,7 @@ public class SqlTable extends MapTable {
             }
         }
         catch (SQLException e) { throw new RuntimeException(e); }
-        autoSave(ctx);
+        autoSave();
         logger.info("fetched {} records",records.size());
     }
 

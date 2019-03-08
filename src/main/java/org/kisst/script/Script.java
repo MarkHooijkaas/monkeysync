@@ -10,36 +10,37 @@ public class Script {
     private static final Logger logger= LogManager.getLogger();
 
     public interface Step {
-        public Context getCompilationContext();
+        public Config getConfig();
         public void run(Context ctx);
     }
 
-    private final Context compileContext;
+    private final Config config;
     private final Step[] steps;
 
-    public Script(Context compileContext, List<Step> lst) {
-        this.compileContext = compileContext;
+    public Script(Config config,List<Step> lst) {
+        this.config=config;
         this.steps=new Step[lst.size()];
         int i=0;
         for (Step s: lst)
             steps[i++]=s;
     }
-    public Script(Context compileContext, Step... steps) {
-        this.compileContext=compileContext;
+    public Script(Config config,Step... steps) {
+        this.config=config;
         this.steps = steps;
     }
 
-    public void run() { run(new Context(compileContext,"run")); }
-    public void run(Context runtime) {
-        for (Step s: steps) {
-            Context ctx=s.getCompilationContext().createRunContext(runtime);
-            Context.pushContext(ctx);
-            try {
+    public void run() {
+        Context ctx=new Context();
+        Context.pushContext(ctx);
+        try {
+            for (Step s : steps) {
+
+                ctx.startStep(s);
                 logger.info("*** {}", s);
                 s.run(ctx);
             }
-            finally { Context.popContext();}
         }
+        finally { Context.popContext();}
     }
 
     @Override public String toString() {
@@ -47,14 +48,14 @@ public class Script {
     }
 
     private void tryStep(Context ctx, Step step) {
-        int tries= ctx.props.getInt("tries",1);
+        int tries= step.getConfig().props.getInt("tries",1);
         if (tries==1) {
             step.run(ctx);
             return;
         }
         int tryCount=0;
 
-        long retryInterval=ctx.props.getInt("retryInterval",0);
+        long retryInterval=step.getConfig().props.getInt("retryInterval",0);
         boolean succeeded=false;
         while (tryCount<tries && ! succeeded) {
             try {

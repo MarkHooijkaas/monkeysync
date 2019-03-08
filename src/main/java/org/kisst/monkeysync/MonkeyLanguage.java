@@ -3,10 +3,7 @@ package org.kisst.monkeysync;
 import org.kisst.monkeysync.mailchimp.MailchimpTable;
 import org.kisst.monkeysync.map.MapTable;
 import org.kisst.monkeysync.sql.SqlTable;
-import org.kisst.script.Context;
-import org.kisst.script.GenericCommand;
-import org.kisst.script.BasicLanguage;
-import org.kisst.script.Script;
+import org.kisst.script.*;
 
 public class MonkeyLanguage extends BasicLanguage {
     public MonkeyLanguage(Command ... cmds) {
@@ -18,15 +15,15 @@ public class MonkeyLanguage extends BasicLanguage {
                 new GenericCommand(SyncCreate.class),
                 new GenericCommand(SyncUpdates.class),
                 new GenericCommand(SyncDeletes.class),
-                new GenericCommand(Send.class)
+                new GenericCommand(Mailer.class, "send")
         ));
     }
 
     public abstract static class TableStep extends BasicStep {
         protected final String tblname;
         private final String line;
-        public TableStep(Context ctx,  String[] args) {
-            super(ctx);
+        public TableStep(Config cfg, String[] args) {
+            super(cfg);
             if (args.length < 2)
                 throw new IllegalArgumentException(args[0]+" should have at least 1 parameter <table> [<file>]");
             this.tblname = args[1];
@@ -39,54 +36,53 @@ public class MonkeyLanguage extends BasicLanguage {
 
     public static class Save extends TableStep {
         private final String file;
-        public Save(Context ctx, String[] args) {
-            super(ctx, args);
+        public Save(Config cfg, String[] args) {
+            super(cfg, args);
             if (args.length>2)
                 this.file=args[2];
             else
-                this.file=ctx.props.getString("file",null);
+                this.file=cfg.props.getString("file",null);
         }
         @Override public void run(Context ctx) {
             Table tbl = getTable(ctx);
             if (file==null)
-                tbl.save(ctx);
+                tbl.save();
             else
-                tbl.save(ctx, file);
+                tbl.save(file);
         }
     }
 
     public static class Load extends TableStep  {
         private final String file;
-        public Load(Context ctx, String[] args) {
-            super(ctx, args);
+        public Load(Config cfg, String[] args) {
+            super(cfg, args);
             if (args.length > 2)
                 this.file = args[2];
             else
-                this.file = ctx.props.getString("file", null);
+                this.file = cfg.props.getString("file", null);
         }
-
         @Override public void run(Context ctx) {
             Table tbl = createTable(ctx);
             if (file == null)
-                tbl.load(ctx);
+                tbl.load();
             else
-                tbl.load(ctx, file);
+                tbl.load(file);
             ctx.setVar(tblname, tbl);
         }
     }
     public static class Fetch extends TableStep {
-        public Fetch(Context ctx, String[] args) { super(ctx, args);}
+        public Fetch(Config cfg, String[] args) { super(cfg, args);}
         @Override public void run(Context ctx) {
             Table tbl=createTable(ctx);
-            tbl.fetch(ctx);
+            tbl.fetch();
             ctx.setVar(tblname, tbl);
         }
     }
 
     public abstract static class SyncStep extends TableStep {
         private final String dest;
-        public SyncStep(Context ctx, String[] args) {
-            super(ctx, args);
+        public SyncStep(Config cfg, String[] args) {
+            super(cfg, args);
             if (args.length!=3)
                 throw new IllegalArgumentException(args[0]+" should have exactly two parameters <src> <dest>");
             this.dest=args[2];
@@ -95,51 +91,34 @@ public class MonkeyLanguage extends BasicLanguage {
     }
 
     public static class Sync extends SyncStep {
-        public Sync(Context ctx, String[] args) { super(ctx, args);}
+        public Sync(Config cfg, String[] args) { super(cfg, args);}
         @Override public void run(Context ctx) {
-            new Syncer(ctx).syncAll(ctx, getTable(ctx), getDest(ctx));
+            new Syncer(getConfig()).syncAll(getTable(ctx), getDest(ctx));
         }
     }
 
     public static class SyncUpdates extends SyncStep {
-        public SyncUpdates(Context ctx, String[] args) { super(ctx, args);}
-        @Override public void run(Context ctx) {
-            new Syncer(ctx).updateRecords(ctx, getTable(ctx), getDest(ctx));
+        public SyncUpdates(Config cfg, String[] args) { super(cfg, args);}
+        @Override public void run(Context ctx) { new Syncer(getConfig()).updateRecords(getTable(ctx), getDest(ctx));
         }
     }
     public static class SyncCreate extends SyncStep {
-        public SyncCreate(Context ctx, String[] args) { super(ctx, args);}
-        @Override public void run(Context ctx) {
-            new Syncer(ctx).createNewRecords(ctx, getTable(ctx), getDest(ctx));
-        }
+        public SyncCreate(Config cfg, String[] args) { super(cfg, args);}
+        @Override public void run(Context ctx) { new Syncer(getConfig()).createNewRecords(getTable(ctx), getDest(ctx)); }
     }
     public static class SyncDeletes extends SyncStep {
-        public SyncDeletes(Context ctx, String[] args) { super(ctx, args);}
+        public SyncDeletes(Config cfg, String[] args) { super(cfg, args);}
         @Override public void run(Context ctx) {
-            new Syncer(ctx).deleteInactiveRecords(ctx,getTable(ctx), getDest(ctx));
+            new Syncer(getConfig()).deleteInactiveRecords(getTable(ctx), getDest(ctx));
         }
-    }
-
-    public static class Send extends BasicStep {
-        private final String name;
-        public Send(Context ctx,  String[] args) {
-            super(ctx);
-            if (args.length != 2)
-                throw new IllegalArgumentException(args[0]+" should have 1 parameter <mailcfg>");
-            this.name = args[1];
-        }
-        @Override public void run(Context ctx) {
-            Mailer.send(ctx, ctx.props.getProps(name));
-        }
-        @Override public String toString() { return "send "+name;}
     }
 
     static public Table createTable(Context ctx, String name) {
-        Props tblprops=ctx.props.getProps(name);
+        Props tblprops=ctx.getCurrentConfig().props.getProps(name);
         String type=tblprops.getString("type");
         Table result;
         if ("SqlTable".equals(type))
-            result=new SqlTable(ctx, tblprops);
+            result=new SqlTable(ctx.getCurrentConfig(),tblprops);
         else if ("MailchimpTable".equals(type))
             result=new MailchimpTable(tblprops);
         else if ("MapTable".equals(type))

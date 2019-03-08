@@ -110,12 +110,12 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
 
     protected final static Gson gson = new Gson();
 
-    @Override public void load(Context ctx) {
+    @Override public void load() {
         if (file==null)
             throw new IllegalArgumentException("No file configured to load table");
-        load(ctx, file);
+        load(file);
     }
-    public void load(Context ctx, String filename) {
+    public void load(String filename) {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -130,16 +130,16 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
         logger.info("loaded {} records from {}",records.size(), filename);
     }
 
-    @Override public void autoSave(Context ctx) {
+    @Override public void autoSave() {
         if (autoSave && file!=null)
-          save(ctx, file);
+          save(file);
     }
-    @Override public void save(Context ctx) {
+    @Override public void save() {
         if (file==null)
             throw new IllegalArgumentException("No file configured to save table");
-        save(ctx, file);
+        save(file);
     }
-    @Override public void save(Context ctx, String filename) {
+    @Override public void save(String filename) {
         try (FileWriter file = new FileWriter(filename)) {
             for (Record rec: records.values()) {
                 file.write(rec.toJson());

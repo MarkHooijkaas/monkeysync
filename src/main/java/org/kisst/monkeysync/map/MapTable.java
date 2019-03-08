@@ -18,7 +18,7 @@ public class MapTable extends BaseTable<MapRecord> {
 
     @Override protected MapRecord createRecord(Record rec) { return new MapRecord(rec);}
 
-    @Override public void fetch(Context ctx) {
+    @Override public void fetch() {
         throw new UnsupportedOperationException("fetch not implemented for "+this.getClass().getSimpleName());
     }
 }

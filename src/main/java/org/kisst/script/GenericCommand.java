@@ -23,10 +23,10 @@ public class GenericCommand<T extends Script.Step>  implements Language.Command 
         return name+" ... TODO";
     }
 
-    @Override public Script.Step parse(Context ctx, String[] args) {
+    @Override public Script.Step parse(Config cfg, String[] args) {
         try {
-            Constructor<T> cons= clz.getConstructor(Context.class, String[].class);
-            return cons.newInstance(ctx, args);
+            Constructor<T> cons= clz.getConstructor(Config.class, String[].class);
+            return cons.newInstance(cfg, args);
         }
         catch (NoSuchMethodException e) { throw new RuntimeException(e); }
         catch (IllegalAccessException e) { throw new RuntimeException(e); }

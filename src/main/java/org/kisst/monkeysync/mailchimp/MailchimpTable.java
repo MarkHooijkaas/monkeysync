@@ -43,14 +43,14 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
         this.deletePermanent=props.getBoolean("deletePermanent", false);
     }
 
-    @Override  public void fetch(Context ctx) {
+    @Override  public void fetch() {
         if (this.retrieveAll) {
             retrieveAll();
-            autoSave(ctx);
+            autoSave();
         }
         if (this.retrieveSince!=null) {
             retrieveMembersSince(retrieveSince);
-            autoSave(ctx);
+            autoSave();
         }
         logger.info("fetched {} records ",records.size());
     }

@@ -1,13 +1,11 @@
 package org.kisst.script;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.stream.Stream;
@@ -16,7 +14,7 @@ public class Language {
     private static final Logger logger= LogManager.getLogger();
 
     public interface Command {
-        Script.Step parse(Context ctx, String[] args);
+        Script.Step parse(Config cfg, String[] args);
         String getName();
         String getHelp();
     }
@@ -32,60 +30,47 @@ public class Language {
     }
 
 
-    public Script compile(Context parent, Stream<String> lines){
-        Context ctx;
-        if (parent==null)
-            ctx=new Context(this);
-        else
-            ctx=new Context(parent,"compile");
-        Context.pushContext(ctx);
-        try {
+    public Script compile(Config cfg, Stream<String> lines){
             ArrayList<Script.Step> steps = new ArrayList<>();
             lines.forEach((line) -> {
-                Script.Step step = parse(ctx, line);
+                Script.Step step = parse(cfg, line);
                 if (step != null)
                     steps.add(step);
             });
-            return new Script(ctx, steps);
-        }
-        finally { Context.popContext();}
+            return new Script(cfg,  steps);
      }
 
-    public Script compile(Context parent, Path path) {
+    public Script compile(Config cfg, Path path) {
         try {
-            return compile(parent, Files.lines(path));
+            return compile(cfg, Files.lines(path));
         } catch (IOException e) { throw new RuntimeException(e); }
     }
 
-    public Script compile(Context ctx, String line) {
+    public Script compile(Config cfg, String line) {
         String[] lines=line.split(",");
-        return compile(ctx, Stream.of(lines));
+        return compile(cfg, Stream.of(lines));
     }
 
-    public Script.Step parse(Context parent, String line) {
-        Context ctx=parent.createSubContext(line.trim());
-        Context.pushContext(ctx);
-        try {
-            line = line.trim();
-            if (line.length() == 0 || line.startsWith("#"))
-                return null;
-            logger.info("compiling {}", line);
-            String[] parts = line.split("\\s+");
-            for (int i = 0; i < parts.length; i++) {
-                if (parseOption(ctx, parts, i))
-                    parts[i] = "";
-            }
-            Command cmd = commands.get(parts[0]);
-            if (cmd == null)
-                throw new UnsupportedOperationException(parts[0]);
-            parts = String.join(" ", parts).split("\\s+");
-            return cmd.parse(ctx, parts);
+    public Script.Step parse(Config parent, String line) {
+        Config cfg=new Config(parent,line.trim());
+        line = line.trim();
+        if (line.length() == 0 || line.startsWith("#"))
+            return null;
+        logger.info("compiling {}", line);
+        String[] parts = line.split("\\s+");
+        for (int i = 0; i < parts.length; i++) {
+            if (parseOption(cfg, parts, i))
+                parts[i] = "";
         }
-        finally { Context.popContext(); }
+        Command cmd = commands.get(parts[0]);
+        if (cmd == null)
+            throw new UnsupportedOperationException(parts[0]);
+        parts = String.join(" ", parts).split("\\s+");
+        return cmd.parse(cfg, parts);
     }
 
-    private boolean parseOption(Context ctx, String[] parts, int i) {
-        if (ctx.parseOption(parts,i))
+    private boolean parseOption(Config cfg, String[] parts, int i) {
+        if (cfg.parseOption(parts,i))
             return true;
         String option=parts[i];
         if ("-h".equals(option) || "--help".equals(option))

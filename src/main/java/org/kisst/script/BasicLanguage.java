@@ -11,19 +11,19 @@ public class BasicLanguage extends Language {
     }
 
     public abstract static class BasicStep implements Script.Step {
-        private final Context compilationContext;
-        public BasicStep(Context compilationContext) { this.compilationContext=compilationContext;}
-        @Override public Context getCompilationContext() { return compilationContext;}
+        private final Config config;
+        public BasicStep(Config cfg) { this.config=cfg;}
+        @Override public Config getConfig() { return config;}
     }
 
     public static class Help extends BasicStep {
-        public Help(Context ctx,  String[] args) { super(ctx);}
-        @Override public void run(Context ctx) { ctx.getLanguage();}
+        public Help(Config cfg,  String[] args) { super(cfg);}
+        @Override public void run(Context ctx) { getConfig().getLanguage().showHelp();}
     }
     public static class Echo extends BasicStep {
         private final String msg;
-        public Echo(Context ctx,  String[] args) {
-            super(ctx);
+        public Echo(Config cfg,  String[] args) {
+            super(cfg);
             this.msg=String.join(" ",args).substring(args[0].length());
         }
         @Override public void run(Context ctx) { System.out.println(msg);}
