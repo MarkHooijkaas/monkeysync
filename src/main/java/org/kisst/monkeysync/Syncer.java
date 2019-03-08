@@ -1,11 +1,15 @@
 package org.kisst.monkeysync;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kisst.script.Context;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public class Syncer {
+    private static final Logger logger= LogManager.getLogger();
+
     private boolean enableDeleteMissingRecords =false;
     private final boolean dryRun;
     private final HashSet<String> ignoreFields=new HashSet<>();
@@ -37,7 +41,7 @@ public class Syncer {
     }
 
     public int createNewRecords(Context ctx, Table srcTable, Table destTable) {
-        ctx.info("* Creating");
+        logger.info("* Creating");
         int count=0;
         int inactive=0;
         for (Record src : srcTable.records()) {
@@ -47,7 +51,7 @@ public class Syncer {
                 continue;
             }
             if (destTable.mayCreateRecord(key)) {
-                ctx.verbose("creating {} {}", key, src);
+                logger.log(Context.VERBOSE, "creating {} {}", key, src);
                 if (ctx.ask("About to create "+key)) {
                     if (! dryRun)
                         destTable.create(src);
@@ -55,15 +59,15 @@ public class Syncer {
                 }
             }
         }
-        ctx.info("   created: {}", count);
-        ctx.info("   inactive: {}", inactive);
+        logger.info("   created: {}", count);
+        logger.info("   inactive: {}", inactive);
         if (! dryRun)
             destTable.autoSave(ctx);
         return count;
     }
 
     public int updateRecords(Context ctx, Table srcTable, Table destTable) {
-        ctx.info("Updating");
+        logger.info("Updating");
         int count=0;
         int identical=0;
         int blocked=0;
@@ -94,7 +98,7 @@ public class Syncer {
                 }
                 // System.out.println(diffs.size()+" for "+dest.getKey());
                 if (diffs.size()>0) {
-                    ctx.verbose("merging: {} {}", key, diffs);
+                    logger.log(Context.VERBOSE, "merging: {} {}", key, diffs);
                     if (ctx.ask("About to merge "+key)) {
                         if (! dryRun)
                             destTable.update(dest, diffs);
@@ -102,20 +106,20 @@ public class Syncer {
                     }
                 }
                 else {
-                    ctx.debug("identical for {}", key);
+                    logger.debug("identical for {}", key);
                     identical++;
                 }
             }
             else {
-                ctx.debug("Not updatable: {}",key);
+                logger.debug("Not updatable: {}",key);
                 blocked++;
             }
         }
-        ctx.info("   updated: {}", count);
-        ctx.info("   identical: {}",identical);
-        ctx.info("   not found in destination: ",missing);
-        ctx.info("   not active in source: {}",notActive);
-        ctx.info("   blocked for updating: {}",blocked);
+        logger.info("   updated: {}", count);
+        logger.info("   identical: {}",identical);
+        logger.info("   not found in destination: ",missing);
+        logger.info("   not active in source: {}",notActive);
+        logger.info("   blocked for updating: {}",blocked);
         if (! dryRun)
             destTable.autoSave(ctx);
         return count;
@@ -123,12 +127,12 @@ public class Syncer {
 
 
     public int deleteInactiveRecords(Context ctx, Table srcTable, Table destTable) {
-        ctx.info("* Deleting inactive");
+        logger.info("* Deleting inactive");
         int count = 0;
         for (Record src : srcTable.records()) {
             final String key = src.getKey();
             if (srcTable.isDeleteDesired(src) && destTable.mayDeleteRecord(key)) {
-                ctx.verbose("deleting {}", key);
+                logger.log(Context.VERBOSE,"deleting {}", key);
                 if (ctx.ask("About to delete "+key)) {
                     if (! dryRun)
                         destTable.delete(src);
@@ -136,19 +140,19 @@ public class Syncer {
                 }
             }
         }
-        ctx.info("   deleted because marked deleted in source: {}", count);
+        logger.info("   deleted because marked deleted in source: {}", count);
         if (! dryRun)
             destTable.autoSave(ctx);
         return count;
     }
     public int deleteMissingRecords(Context ctx, Table srcTable, Table destTable) {
-        ctx.info("* Deleting missing");
+        logger.info("* Deleting missing");
         int count=0;
         if (false) {
             for (Record dest : destTable.records()) {
                 final String key = dest.getKey();
                 if (destTable.mayDeleteRecord(key) && !srcTable.recordExists(key)) {
-                    ctx.verbose("deleting missing record {}", key);
+                    logger.log(Context.VERBOSE,"deleting missing record {}", key);
                     if (ctx.ask("About to delete "+key)) {
                         if (! dryRun)
                             destTable.delete(dest);
@@ -158,7 +162,7 @@ public class Syncer {
                 }
             }
         }
-        ctx.info("   deleted because missing in source: {}", count);
+        logger.info("   deleted because missing in source: {}", count);
         if (! dryRun)
             destTable.autoSave(ctx);
         return count;

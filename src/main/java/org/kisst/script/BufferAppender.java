@@ -5,6 +5,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -29,7 +30,9 @@ public final class BufferAppender extends AbstractAppender {
         try {
             final byte[] bytes = getLayout().toByteArray(event);
             Context ctx=Context.getThreadContext();
-
+            Level level=event.getLevel();
+            if (ctx!=null &&  ctx.getLoglevel().intLevel()<level.intLevel())
+                return;
             if (ctx!=null)
                 System.out.print(ctx.getName()+": ");
             System.out.write(bytes);

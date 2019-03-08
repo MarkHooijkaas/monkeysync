@@ -39,7 +39,7 @@ public class SyncCli {
         if (str.trim().length()==0)
             str=ctx.props.getString("script.cmd");
         Script script =lang.compile(ctx, str);
-        ctx.info("compiled to {}",script.toString());
+        logger.info("compiled to {}",script.toString());
 
         String schedule=ctx.props.getString("script.schedule",null);
         if (schedule==null)

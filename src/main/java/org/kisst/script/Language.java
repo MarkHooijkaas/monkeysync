@@ -1,6 +1,8 @@
 package org.kisst.script;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.stream.Stream;
 
 public class Language {
+    private static final Logger logger= LogManager.getLogger();
+
     public interface Command {
         Script.Step parse(Context ctx, String[] args);
         String getName();
@@ -62,7 +66,7 @@ public class Language {
         line = line.trim();
         if (line.length() == 0 || line.startsWith("#"))
             return null;
-        ctx.info("compiling {}", line);
+        logger.info("compiling {}", line);
         String[] parts = line.split("\\s+");
         for (int i = 0; i < parts.length; i++) {
             if (parseOption(ctx, parts, i))
@@ -71,6 +75,7 @@ public class Language {
         Command cmd=commands.get(parts[0]);
         if (cmd==null)
             throw new UnsupportedOperationException(parts[0]);
+        parts=String.join(" ",parts).split("\\s+");
         return cmd.parse(ctx, parts);
     }
 

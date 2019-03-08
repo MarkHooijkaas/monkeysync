@@ -23,7 +23,7 @@ public class MonkeyLanguage extends BasicLanguage {
     }
 
     public abstract static class TableStep implements Script.Step {
-        private final String tblname;
+        protected final String tblname;
         private final String line;
         public TableStep(Context ctx,  String[] args) {
             if (args.length < 2)
@@ -70,12 +70,15 @@ public class MonkeyLanguage extends BasicLanguage {
                 tbl.load(ctx);
             else
                 tbl.load(ctx, file);
+            ctx.setVar(tblname, tbl);
         }
     }
     public static class Fetch extends TableStep {
         public Fetch(Context ctx, String[] args) { super(ctx, args);}
         @Override public void run(Context ctx) {
-            createTable(ctx).fetch(ctx);
+            Table tbl=createTable(ctx);
+            tbl.fetch(ctx);
+            ctx.setVar(tblname, tbl);
         }
     }
 

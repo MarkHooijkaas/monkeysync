@@ -1,9 +1,14 @@
 package org.kisst.script;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Arrays;
 import java.util.List;
 
 public class Script {
+    private static final Logger logger= LogManager.getLogger();
+
     public interface Step {
         public void run(Context ctx);
     }
@@ -29,7 +34,7 @@ public class Script {
             Context ctx=parent.createSubContext(s.toString());
             Context.pushContext(ctx);
             try {
-                ctx.info("*** {}", s);
+                logger.info("*** {}", s);
                 s.run(ctx);
             }
             finally { Context.popContext();}
@@ -58,9 +63,9 @@ public class Script {
                 tryCount++;
                 if (tryCount>=tries)
                     throw e;
-                ctx.warn("Retrying {} because it failed with error {} ",step,e);
+                logger.warn("Retrying {} because it failed with error {} ",step,e);
                 if (retryInterval>0) {
-                    ctx.info("sleeping {} second before retry", retryInterval/1000);
+                    logger.info("sleeping {} second before retry", retryInterval/1000);
                     ctx.sleep(retryInterval);
                 }
             }

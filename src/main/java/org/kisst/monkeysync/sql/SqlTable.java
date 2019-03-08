@@ -1,5 +1,7 @@
 package org.kisst.monkeysync.sql;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.map.MapRecord;
 import org.kisst.monkeysync.map.MapTable;
@@ -14,6 +16,8 @@ import java.util.LinkedHashMap;
 
 
 public class SqlTable extends MapTable {
+    private static final Logger logger= LogManager.getLogger();
+
     private final Props dbprops;
 
     public SqlTable(Context ctx, Props props) {
@@ -65,7 +69,7 @@ public class SqlTable extends MapTable {
         }
         catch (SQLException e) { throw new RuntimeException(e); }
         autoSave(ctx);
-        ctx.info("fetched {} records",records.size());
+        logger.info("fetched {} records",records.size());
     }
 
     private Connection connect(Props props) {

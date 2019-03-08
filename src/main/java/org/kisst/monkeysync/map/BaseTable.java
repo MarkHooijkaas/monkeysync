@@ -1,6 +1,8 @@
 package org.kisst.monkeysync.map;
 
 import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kisst.monkeysync.CachedObject;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
@@ -17,6 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class BaseTable<R extends Record> implements Table, CachedObject {
+    private static final Logger logger= LogManager.getLogger();
+
     protected final Props props;
     private final LinkedHashMap<String, String> fieldNames=new LinkedHashMap<>();
     protected final LinkedHashMap<String, R> records=new LinkedHashMap<>();
@@ -123,7 +127,7 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        ctx.info("loaded {} records from {}",records.size(), filename);
+        logger.info("loaded {} records from {}",records.size(), filename);
     }
 
     @Override public void autoSave(Context ctx) {
@@ -143,7 +147,7 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        ctx.info("Saved {} records to {}",records.size(),filename);
+        logger.info("Saved {} records to {}",records.size(),filename);
     }
 
     public void saveTabDelimited(Context ctx, String filename) {
@@ -163,6 +167,6 @@ public abstract class BaseTable<R extends Record> implements Table, CachedObject
             }
         }
         catch (IOException e) { throw new RuntimeException(e);}
-        ctx.info("Saved {} records to {}",records.size(),filename);
+        logger.info("Saved {} records to {}",records.size(),filename);
     }
 }

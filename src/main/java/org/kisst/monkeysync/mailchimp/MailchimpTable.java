@@ -1,5 +1,7 @@
 package org.kisst.monkeysync.mailchimp;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.Record;
 import org.kisst.monkeysync.map.BaseTable;
@@ -10,6 +12,8 @@ import java.time.Instant;
 import java.util.Map;
 
 public class MailchimpTable extends BaseTable<MailchimpRecord> implements MailchimpConnector.MemberInserter {
+    private static final Logger logger= LogManager.getLogger();
+
     private final MailchimpConnector connector;
     private final String necessaryInterest;
     private final boolean retrieveAll;
@@ -48,7 +52,7 @@ public class MailchimpTable extends BaseTable<MailchimpRecord> implements Mailch
             retrieveMembersSince(retrieveSince);
             autoSave(ctx);
         }
-        ctx.info("fetched {} records ",records.size());
+        logger.info("fetched {} records ",records.size());
     }
 
 
