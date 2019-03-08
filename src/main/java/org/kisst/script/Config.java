@@ -54,6 +54,10 @@ public class Config {
             setLoglevel(Level.WARN);
         else if ("-d".equals(option) || "--debug".equals(option))
             setLoglevel(Level.DEBUG);
+        else if ("-w".equals(option) || "--wet-run".equals(option))
+            dryRun=false;
+        else if ("-r".equals(option) || "--dry-run".equals(option))
+            dryRun=true;
         else if ("-c".equals(option) || "--config".equals(option)) {
             if (! "-".equals(parts[i+1]))
                 props.loadProps(Paths.get(parts[i+1]));
