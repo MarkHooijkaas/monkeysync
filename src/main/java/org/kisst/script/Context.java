@@ -21,6 +21,7 @@ public class Context {
     protected final Context parent;
     private Level verbosity=Level.INFO;
     public Level bufferLevel=Level.DEBUG;
+    public boolean dryRun=true;
     private final Language language;
     private final String name;
 
@@ -42,6 +43,7 @@ public class Context {
         this.verbosity=parent.verbosity;
         this.vars=vars;
         this.name=name;
+        this.dryRun=parent.dryRun;
     }
 
 

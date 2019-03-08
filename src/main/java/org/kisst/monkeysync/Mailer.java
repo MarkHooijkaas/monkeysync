@@ -1,5 +1,7 @@
 package org.kisst.monkeysync;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kisst.script.Context;
 
 import javax.mail.Message;
@@ -16,6 +18,7 @@ import java.util.Properties;
 
 
 public class Mailer {
+    private static final Logger logger= LogManager.getLogger();
 
     public static void sendFromGMail(Props props, String body) {
         String host = props.getString("host");
@@ -56,6 +59,8 @@ public class Mailer {
         }
         catch (IOException e) { throw new RuntimeException(e); }
         String body=ctx.substitute(template);
-        sendFromGMail(props, body);
+        if (! ctx.dryRun)
+            sendFromGMail(props, body);
+        logger.debug("sending mail {}", body);
     }
 }
