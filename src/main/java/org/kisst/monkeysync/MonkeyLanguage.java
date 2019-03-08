@@ -18,7 +18,7 @@ public class MonkeyLanguage extends BasicLanguage {
                 new GenericCommand(SyncCreate.class),
                 new GenericCommand(SyncUpdates.class),
                 new GenericCommand(SyncDeletes.class),
-                new GenericCommand(Mail.class)
+                new GenericCommand(Send.class)
         ));
     }
 
@@ -120,9 +120,9 @@ public class MonkeyLanguage extends BasicLanguage {
         }
     }
 
-    public static class Mail extends BasicStep {
+    public static class Send extends BasicStep {
         private final String name;
-        public Mail(Context ctx,  String[] args) {
+        public Send(Context ctx,  String[] args) {
             super(ctx);
             if (args.length != 2)
                 throw new IllegalArgumentException(args[0]+" should have 1 parameter <mailcfg>");
@@ -131,6 +131,7 @@ public class MonkeyLanguage extends BasicLanguage {
         @Override public void run(Context ctx) {
             Mailer.send(ctx, ctx.props.getProps(name));
         }
+        @Override public String toString() { return "send "+name;}
     }
 
     static public Table createTable(Context ctx, String name) {

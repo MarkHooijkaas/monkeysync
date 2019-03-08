@@ -20,7 +20,7 @@ public class Context {
     private final HashMap<String, Object> vars;
     protected final Context parent;
     private Level verbosity=Level.INFO;
-    private Level memoryLevel=Level.DEBUG;
+    public Level bufferLevel=Level.DEBUG;
     private final Language language;
     private final String name;
 
@@ -64,8 +64,8 @@ public class Context {
     }
     public void setVar(String name, Object val) { vars.put(name, val);}
 
-    private StringBuilder getBuffer(Level lvl) {
-        String levelname=lvl.name()+"_BUFFER";
+    public StringBuilder getBuffer(Level lvl) {
+        String levelname=lvl.name()+"_LOG";
         StringBuilder result= (StringBuilder) getVar(levelname);
         if (result==null) {
             result=new StringBuilder();

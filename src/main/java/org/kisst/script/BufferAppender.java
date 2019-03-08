@@ -35,10 +35,11 @@ public final class BufferAppender extends AbstractAppender {
             final byte[] bytes = getLayout().toByteArray(event);
             Context ctx=Context.getThreadContext();
             Level level=event.getLevel();
+            if (ctx!=null &&  ctx.bufferLevel.intLevel()>=level.intLevel())
+                ctx.getBuffer(level).append(bytes);
             if (ctx!=null &&  ctx.getLoglevel().intLevel()<level.intLevel())
                 return;
-            if (ctx!=null)
-                System.out.print(ctx.getName()+": ");
+            //if (ctx!=null) System.out.print(ctx.getName()+": ");
             System.out.write(bytes);
         } catch (Exception ex) {
             if (!ignoreExceptions()) {
