@@ -10,6 +10,7 @@ public class Script {
     private static final Logger logger= LogManager.getLogger();
 
     public interface Step {
+        public Context getCompilationContext();
         public void run(Context ctx);
     }
 
@@ -29,9 +30,9 @@ public class Script {
     }
 
     public void run() { run(new Context(compileContext,"run")); }
-    public void run(Context parent) {
+    public void run(Context runtime) {
         for (Step s: steps) {
-            Context ctx=parent.createSubContext(s.toString());
+            Context ctx=s.getCompilationContext().createRunContext(runtime);
             Context.pushContext(ctx);
             try {
                 logger.info("*** {}", s);

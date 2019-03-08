@@ -63,7 +63,7 @@ public class Language {
     }
 
     public Script.Step parse(Context parent, String line) {
-        Context ctx=parent.createSubContext(line);
+        Context ctx=parent.createSubContext(line.trim());
         Context.pushContext(ctx);
         try {
             line = line.trim();

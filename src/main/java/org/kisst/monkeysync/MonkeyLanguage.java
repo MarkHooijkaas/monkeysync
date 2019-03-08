@@ -22,10 +22,11 @@ public class MonkeyLanguage extends BasicLanguage {
         ));
     }
 
-    public abstract static class TableStep implements Script.Step {
+    public abstract static class TableStep extends BasicStep {
         protected final String tblname;
         private final String line;
         public TableStep(Context ctx,  String[] args) {
+            super(ctx);
             if (args.length < 2)
                 throw new IllegalArgumentException(args[0]+" should have at least 1 parameter <table> [<file>]");
             this.tblname = args[1];
@@ -119,9 +120,10 @@ public class MonkeyLanguage extends BasicLanguage {
         }
     }
 
-    public static class Mail implements Script.Step {
+    public static class Mail extends BasicStep {
         private final String name;
         public Mail(Context ctx,  String[] args) {
+            super(ctx);
             if (args.length != 2)
                 throw new IllegalArgumentException(args[0]+" should have 1 parameter <mailcfg>");
             this.name = args[1];

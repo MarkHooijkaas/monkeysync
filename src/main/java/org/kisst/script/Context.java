@@ -17,7 +17,7 @@ public class Context {
     public final Props props;
 
     private static final Logger logger=LogManager.getLogger();
-    private final HashMap<String, Object> vars=new HashMap<>();
+    private final HashMap<String, Object> vars;
     protected final Context parent;
     private Level verbosity=Level.INFO;
     private Level memoryLevel=Level.DEBUG;
@@ -29,12 +29,18 @@ public class Context {
         this.language=language;
         this.props=new Props();
         this.name=language.getClass().getSimpleName();
+        this.vars=new HashMap<>();
     }
     public Context(Context parent, String name) {
+        this(parent, new HashMap<>(),name);
+    }
+
+    public Context(Context parent, HashMap<String, Object> vars, String name) {
         this.parent=parent;
         this.language=parent.language;
         this.props=new PropsLayer(parent.props);
         this.verbosity=parent.verbosity;
+        this.vars=vars;
         this.name=name;
     }
 
@@ -44,6 +50,9 @@ public class Context {
         @Override public void setVar(String name, Object val) { this.parent.setVar(name, val);}
     }
     public SubContext createSubContext(String name) { return new SubContext(this, name); }
+    public Context createRunContext(Context runtime) {
+        return new Context(this, runtime.vars, "run("+name+")");
+    }
 
     public String getName() { return name;}
     public String getFullName() {return parent==null? name: parent.getFullName()+"."+name; }
