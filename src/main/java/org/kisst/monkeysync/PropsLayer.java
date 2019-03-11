@@ -1,9 +1,10 @@
 package org.kisst.monkeysync;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class PropsLayer extends Props {
-    private static final String NULL=new String("@NULL@");
+    private static final String NULL_STRING =new String("@NULL_STRING@");
     private final Props parent;
 
     public PropsLayer(Props parent) {
@@ -13,7 +14,7 @@ public class PropsLayer extends Props {
 
     @Override public String get(String key) {
         String result=props.get(key);
-        if (result==NULL) // Hack to make it possible to clear a property set in the parent
+        if (result== NULL_STRING) // Hack to make it possible to clear a property set in the parent
             return null;
         if (result==null)
             return parent.get(key);
@@ -21,9 +22,9 @@ public class PropsLayer extends Props {
     }
 
     @Override public Set<String> keySet() {
-        Set<String> result=parent.keySet();
+        Set<String> result=new HashSet<>(parent.keySet());
         for (String key : props.keySet()) {
-            if (props.get(key) == NULL)
+            if (props.get(key) == NULL_STRING)
                 result.remove(key);
             else
                 result.add(key);
@@ -45,7 +46,7 @@ public class PropsLayer extends Props {
 
     @Override public void clearProp(String name) {
         if (parent.get(name)!=null)
-            props.put(name, NULL); // Override the parent property
+            props.put(name, NULL_STRING); // Override the parent property
         else
             props.remove(name);
     }
