@@ -18,7 +18,6 @@ public class Config {
     protected final Config parent;
     private Level verbosity=Level.INFO;
     public Level bufferLevel=Level.DEBUG;
-    public boolean dryRun=true;
     private final Language language;
     private final String name;
 
@@ -34,7 +33,6 @@ public class Config {
         this.props=new PropsLayer(parent.props);
         this.verbosity=parent.verbosity;
         this.name=name;
-        this.dryRun=parent.dryRun;
     }
 
 
@@ -55,9 +53,9 @@ public class Config {
         else if ("-d".equals(option) || "--debug".equals(option))
             setLoglevel(Level.DEBUG);
         else if ("-w".equals(option) || "--wet-run".equals(option))
-            dryRun=false;
+            props.parseLine("dryRun=false");
         else if ("-r".equals(option) || "--dry-run".equals(option))
-            dryRun=true;
+            props.parseLine("dryRun=true");
         else if ("-c".equals(option) || "--config".equals(option)) {
             if (! "-".equals(parts[i+1]))
                 props.loadProps(Paths.get(parts[i+1]));

@@ -23,7 +23,7 @@ public class Syncer {
             for (String field : str.split(","))
                 ignoreFields.add(field.trim());
         }
-        this.dryRun=cfg.props.getBoolean("sync.dryRun", true);
+        this.dryRun=cfg.props.getBoolean("dryRun", true);
     }
 
     /**

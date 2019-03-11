@@ -42,7 +42,7 @@ public class Mailer extends BasicLanguage.BasicStep {
 
     @Override public void run(Context ctx) {
         String body=ctx.substitute(template);
-        if (! getConfig().dryRun)
+        if (! getConfig().props.getBoolean("dryRun", false))
             sendFromGMail(mailprops, body);
         logger.debug("sending mail\n{}", body);
     }
