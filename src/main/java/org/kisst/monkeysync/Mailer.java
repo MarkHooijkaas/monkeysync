@@ -43,12 +43,12 @@ public class Mailer extends BasicLanguage.BasicStep {
     @Override public void run(Context ctx) {
         String body=ctx.substitute(template);
         if (! getConfig().props.getBoolean("dryRun", false))
-            sendFromGMail(mailprops, body);
+            sendMail(mailprops, body);
         logger.debug("sending mail\n{}", body);
     }
 
 
-    public static void sendFromGMail(Props props, String body) {
+    public static void sendMail(Props props, String body) {
         String host = props.getString("host");
         String from= props.getString("user");
         String pass= props.getString("password");
