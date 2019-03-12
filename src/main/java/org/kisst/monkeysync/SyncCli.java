@@ -29,9 +29,10 @@ public class SyncCli {
                 configFound=true;
             if (args[i].indexOf(",")>=0)
                 break;
-            if (args[i].trim().startsWith("-"))
+            if (! args[i].trim().startsWith("-"))
                 break;
-            cfg.parseOption(args, i);
+            if (cfg.parseOption(args, i))
+                args[i]="";
         }
         String str=String.join(" ", args).trim();
         // load default config if not specified otherwise
