@@ -9,9 +9,9 @@ import java.util.Properties;
 import java.util.Set;
 
 public class Props {
-    public final LinkedHashMap<String,String> props=new LinkedHashMap<>();
+    public final LinkedHashMap<String,String> map =new LinkedHashMap<>();
 
-    public String get(String key) {  return props.get(key);}
+    public String get(String key) {  return map.get(key);}
 
     public String getString(String key, String defaultValue) {
         String result = get(key);
@@ -72,7 +72,7 @@ public class Props {
             list[i]=list[i].trim();
         return list;
     }
-    public Set<String> keySet() { return props.keySet(); }
+    public Set<String> keySet() { return map.keySet(); }
 
     public Props getProps(String prefix) {
         if (! prefix.endsWith("."))
@@ -80,15 +80,15 @@ public class Props {
         Props result=new Props();
         for (String key: keySet()) {
             if (key.startsWith(prefix))
-                result.props.put(key.substring(prefix.length()), get(key));
+                result.map.put(key.substring(prefix.length()), get(key));
         }
         return result;
     }
 
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (String key:props.keySet())
-            result.append(key+" = "+props.get(key)+"\n");
+        for (String key: map.keySet())
+            result.append(key+" = "+ map.get(key)+"\n");
         return result.toString();
     }
 
@@ -97,7 +97,7 @@ public class Props {
             Properties p = new Properties();
             p.load(new FileReader(path.toFile()));
             for (Object key: p.keySet())
-                this.props.put((String) key, StringUtil.substitute(p.getProperty((String)key),props));
+                this.map.put((String) key, StringUtil.substitute(p.getProperty((String)key), map));
         }
         catch (IOException e) { throw new RuntimeException(e);}
     }
@@ -107,9 +107,9 @@ public class Props {
         if (pos>0) {
             String key=line.substring(0,pos);
             String value=line.substring(pos+1);
-            props.put(key,value);
+            map.put(key,value);
         }
     }
-    public void clearProp(String name) { props.remove(name); }
+    public void clearProp(String name) { map.remove(name); }
 
 }

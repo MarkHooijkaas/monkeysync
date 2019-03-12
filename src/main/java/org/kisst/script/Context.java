@@ -38,7 +38,7 @@ public class Context {
 
     public String substitute(String str) {
         if (currentStep!=null)
-            return StringUtil.substitute(str, currentStep.getConfig().props.props, vars);
+            return StringUtil.substitute(str, currentStep.getConfig().props.map, vars);
         return StringUtil.substitute(str, vars);
     }
 

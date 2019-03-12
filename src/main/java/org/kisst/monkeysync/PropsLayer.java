@@ -13,7 +13,7 @@ public class PropsLayer extends Props {
     }
 
     @Override public String get(String key) {
-        String result=props.get(key);
+        String result= map.get(key);
         if (result== NULL_STRING) // Hack to make it possible to clear a property set in the parent
             return null;
         if (result==null)
@@ -23,8 +23,8 @@ public class PropsLayer extends Props {
 
     @Override public Set<String> keySet() {
         Set<String> result=new HashSet<>(parent.keySet());
-        for (String key : props.keySet()) {
-            if (props.get(key) == NULL_STRING)
+        for (String key : map.keySet()) {
+            if (map.get(key) == NULL_STRING)
                 result.remove(key);
             else
                 result.add(key);
@@ -39,15 +39,15 @@ public class PropsLayer extends Props {
         result=parent.getProps(prefix);
         for (String key: keySet()) {
             if (key.startsWith(prefix))
-                result.props.put(key.substring(prefix.length()), get(key));
+                result.map.put(key.substring(prefix.length()), get(key));
         }
         return result;
     }
 
     @Override public void clearProp(String name) {
         if (parent.get(name)!=null)
-            props.put(name, NULL_STRING); // Override the parent property
+            map.put(name, NULL_STRING); // Override the parent property
         else
-            props.remove(name);
+            map.remove(name);
     }
 }
