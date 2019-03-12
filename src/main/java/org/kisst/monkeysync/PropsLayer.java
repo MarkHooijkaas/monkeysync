@@ -14,9 +14,10 @@ public class PropsLayer extends Props {
 
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("PropsLayer{ parent="+parent.toString());
+        result.append("PropsLayer{ ");
         for (String key: map.keySet())
             result.append(key+" = "+ map.get(key)+"\n");
+        result.append("@parent="+parent.toString());
         result.append("}");
         return result.toString();
     }

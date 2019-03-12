@@ -3,7 +3,7 @@ package org.kisst.monkeysync;
 import java.util.Map;
 
 public class StringUtil {
-    static public String substitute(String str, Map<String,?>... maps) {
+    static public String substitute(String str, Object... maps) {
         StringBuilder result = new StringBuilder();
         int prevpos=0;
         int pos=str.indexOf("${");
@@ -20,8 +20,14 @@ public class StringUtil {
             }
             result.append(str.substring(prevpos,pos));
             String value=null;
-            for (Map<String,?> m: maps) {
-                Object o = m.get(key);
+            for (Object m: maps) {
+                Object o =null;
+                if (m instanceof Map)
+                    o= ((Map) m).get(key);
+                else if (m instanceof Props)
+                    o=((Props)m).get(key);
+                else
+                    throw new IllegalArgumentException(m.getClass()+" is not a Map or Props");
                 if (o!=null) {
                     value = o.toString();
                     continue;
