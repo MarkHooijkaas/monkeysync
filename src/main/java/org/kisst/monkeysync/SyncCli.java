@@ -7,6 +7,7 @@ import org.kisst.script.Config;
 import org.kisst.script.Context;
 import org.kisst.script.Script;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -23,21 +24,21 @@ public class SyncCli {
 
         // dirty hack to see if default configuration is needed
         boolean configFound=false;
-        for (String arg: args) {
-            if (arg.equals("-c")||arg.equals("--config"))
+        for (int i=0; i<args.length; i++) {
+            if (args[i].equals("-c")||args[i].equals("--config"))
                 configFound=true;
-            if (arg.equals("-q")||arg.equals("--quiet"))
-                cfg.setLoglevel(Level.WARN); // turn off logging to prevent showing the loading config message
-            if (arg.indexOf(",")>=0)
+            if (args[i].indexOf(",")>=0)
                 break;
+            if (args[i].trim().startsWith("-"))
+                break;
+            cfg.parseOption(args, i);
         }
-        String str=String.join(" ", args);
+        String str=String.join(" ", args).trim();
         // load default config if not specified otherwise
-        if (!configFound)
+        if (! configFound)
             cfg.props.loadProps(Paths.get("config/monkeysync.props"));
 
-
-        if (str.trim().length()==0)
+        if (str.length()==0)
             str=cfg.props.getString("script.cmd");
         Script script =lang.compile(cfg, str);
         logger.info("compiled to {}",script.toString());
