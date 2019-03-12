@@ -26,7 +26,7 @@ public class BasicLanguage extends Language {
             super(cfg);
             this.msg=String.join(" ",args).substring(args[0].length());
         }
-        @Override public void run(Context ctx) { System.out.println(msg);}
+        @Override public void run(Context ctx) { System.out.println(ctx.substitute(msg));}
         @Override public String toString() { return "echo "+msg;}
     }
 }
