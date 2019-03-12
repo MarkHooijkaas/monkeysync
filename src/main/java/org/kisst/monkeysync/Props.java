@@ -87,8 +87,10 @@ public class Props {
 
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (String key: map.keySet())
-            result.append(key+" = "+ map.get(key)+"\n");
+        result.append("Props{");
+        for (String key : map.keySet())
+            result.append(key + " = " + map.get(key) + "\n");
+        result.append("}");
         return result.toString();
     }
 

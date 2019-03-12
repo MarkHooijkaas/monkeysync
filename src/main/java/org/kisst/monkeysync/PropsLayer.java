@@ -12,6 +12,15 @@ public class PropsLayer extends Props {
         this.parent=parent;
     }
 
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("PropsLayer{ parent="+parent.toString());
+        for (String key: map.keySet())
+            result.append(key+" = "+ map.get(key)+"\n");
+        result.append("}");
+        return result.toString();
+    }
+
     @Override public String get(String key) {
         String result= map.get(key);
         if (result== NULL_STRING) // Hack to make it possible to clear a property set in the parent
