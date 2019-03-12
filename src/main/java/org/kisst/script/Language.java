@@ -58,13 +58,16 @@ public class Language {
             return null;
         logger.info("compiling {}", line);
         String[] parts = line.split("\\s+");
+        String cmdname=null;
         for (int i = 0; i < parts.length; i++) {
             if (parseOption(cfg, parts, i))
                 parts[i] = "";
+            else if (cmdname==null && ! parts[i].startsWith("-"))
+                cmdname=parts[i];
         }
-        Command cmd = commands.get(parts[0]);
+        Command cmd = commands.get(cmdname);
         if (cmd == null)
-            throw new UnsupportedOperationException(parts[0]);
+            throw new UnsupportedOperationException(cmdname);
         parts = String.join(" ", parts).split("\\s+");
         return cmd.parse(cfg, parts);
     }
