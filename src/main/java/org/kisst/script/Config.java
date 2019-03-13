@@ -5,18 +5,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kisst.monkeysync.Props;
 import org.kisst.monkeysync.PropsLayer;
-import org.kisst.monkeysync.StringUtil;
 
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Stack;
 
 public class Config {
     private static final Logger logger=LogManager.getLogger();
 
     public final Props props;
     protected final Config parent;
-    private Level verbosity=Level.INFO;
+    private Level logLevel =Level.INFO;
     public Level bufferLevel=Level.DEBUG;
     private final Language language;
     private final String name;
@@ -36,10 +33,11 @@ public class Config {
                 String subkey = key.substring(name.length() + 1);
                 String value = parent.props.get(key);
                 this.props.put(subkey, value);
-                logger.debug("Setting subkey {} for command {} to {} ",subkey,name, value);
+                if (logEnabled(Level.DEBUG))
+                    logger.debug("Setting subkey {} for command {} to {} ",subkey,name, value);
             }
         }
-        this.verbosity=parent.verbosity;
+        this.logLevel =parent.logLevel;
         this.name=name;
     }
 
@@ -48,9 +46,10 @@ public class Config {
     public String getFullName() {return parent==null? name: parent.getFullName()+"."+name; }
     @Override public String toString() {return getFullName(); }
 
-    public Level getLoglevel() { return this.verbosity; }
-    public void setLoglevel(Level level) { this.verbosity=level; }
+    public Level getLoglevel() { return this.logLevel; }
+    public void setLoglevel(Level level) { this.logLevel =level; }
     public Language getLanguage() { return this.language; }
+    public boolean logEnabled(Level level) { return logLevel.intLevel()>=level.intLevel();}
 
     public boolean parseOption(String[] parts, int i) {
         String option=parts[i];
