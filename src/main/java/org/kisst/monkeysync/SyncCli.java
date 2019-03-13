@@ -21,11 +21,12 @@ public class SyncCli {
 
         // dirty hack to see if default configuration is needed
         boolean configFound=false;
+        String schedule=null;
         for (int i=0; i<args.length; i++) {
             if (args[i].equals("-c")||args[i].equals("--config"))
                 configFound=true;
             else if (args[i].equals("--once")||args[i].equals("--now")) {
-                cfg.props.put("script.schedule", "once");
+                schedule = "once";
                 args[i] = "";
             }
             else if (args[i].indexOf(",")>=0)
@@ -45,7 +46,8 @@ public class SyncCli {
         Script script =lang.compile(cfg, str);
         logger.info("compiled to {}",script.toString());
 
-        String schedule=cfg.props.getString("script.schedule",null);
+        if (schedule==null)
+            schedule=cfg.props.getString("script.schedule",null);
         schedule(script, schedule);
     }
 
