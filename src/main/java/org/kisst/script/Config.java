@@ -36,7 +36,7 @@ public class Config {
                 String subkey = key.substring(name.length() + 1);
                 String value = parent.props.get(key);
                 this.props.put(subkey, value);
-                logger.debug("Setting subkey {} to {} for command {}",subkey,value,name);
+                logger.debug("Setting subkey {} for command {} to {} ",subkey,name, value);
             }
         }
         this.verbosity=parent.verbosity;
