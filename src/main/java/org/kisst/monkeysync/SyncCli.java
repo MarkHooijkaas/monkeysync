@@ -1,13 +1,10 @@
 package org.kisst.monkeysync;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kisst.script.Config;
-import org.kisst.script.Context;
 import org.kisst.script.Script;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,11 +24,15 @@ public class SyncCli {
         for (int i=0; i<args.length; i++) {
             if (args[i].equals("-c")||args[i].equals("--config"))
                 configFound=true;
-            if (args[i].indexOf(",")>=0)
+            else if (args[i].equals("--once")||args[i].equals("--now")) {
+                cfg.props.put("script.schedule", "once");
+                args[i] = "";
+            }
+            else if (args[i].indexOf(",")>=0)
                 break;
-            if (! args[i].trim().startsWith("-"))
+            else if (! args[i].trim().startsWith("-"))
                 break;
-            if (cfg.parseOption(args, i))
+            else if (cfg.parseOption(args, i))
                 args[i]="";
         }
         String str=String.join(" ", args).trim();
@@ -45,13 +46,14 @@ public class SyncCli {
         logger.info("compiled to {}",script.toString());
 
         String schedule=cfg.props.getString("script.schedule",null);
-        if (schedule==null)
-            script.run();
-        else
-            schedule(script, schedule);
+        schedule(script, schedule);
     }
 
     private static void schedule(Script script, String schedule) {
+        if (schedule==null || schedule.equals("now") || schedule.equals("once")) {
+            script.run();
+            return;
+        }
         Timer timer=new Timer("timer");
         LocalDateTime now= LocalDateTime.now();
         LocalDateTime ldt=now;
