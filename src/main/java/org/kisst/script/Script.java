@@ -34,10 +34,9 @@ public class Script {
         Context.pushContext(ctx);
         try {
             for (Step s : steps) {
-
                 ctx.startStep(s);
                 logger.info("*** {}", s);
-                s.run(ctx);
+                tryStep(ctx,s);
             }
         }
         finally { Context.popContext();}
