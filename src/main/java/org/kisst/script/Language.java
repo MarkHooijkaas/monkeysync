@@ -52,7 +52,6 @@ public class Language {
     }
 
     public Script.Step parse(Config parent, String line) {
-        Config cfg=new Config(parent,line.trim());
         line = line.trim();
         if (line.length() == 0 || line.startsWith("#"))
             return null;
@@ -60,10 +59,13 @@ public class Language {
         String[] parts = line.split("\\s+");
         String cmdname=null;
         for (int i = 0; i < parts.length; i++) {
+            if (cmdname==null && ! parts[i].startsWith("-"))
+                cmdname=parts[i];
+        }
+        Config cfg=new Config(parent,cmdname.trim());
+        for (int i = 0; i < parts.length; i++) {
             if (parseOption(cfg, parts, i))
                 parts[i] = "";
-            else if (cmdname==null && ! parts[i].startsWith("-"))
-                cmdname=parts[i];
         }
         Command cmd = commands.get(cmdname);
         if (cmd == null)

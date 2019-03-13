@@ -31,6 +31,14 @@ public class Config {
         this.parent=parent;
         this.language=parent.language;
         this.props=new PropsLayer(parent.props);
+        for (String key: parent.props.keySet()) {
+            if (key.startsWith(name+".")) {
+                String subkey = key.substring(name.length() + 1);
+                String value = parent.props.get(key);
+                this.props.put(subkey, value);
+                logger.debug("Setting subkey {} to {} for command {}",subkey,value,name);
+            }
+        }
         this.verbosity=parent.verbosity;
         this.name=name;
     }

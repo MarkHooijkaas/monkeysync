@@ -12,6 +12,7 @@ public class Props {
     protected final LinkedHashMap<String,String> map =new LinkedHashMap<>();
 
     public String get(String key) {  return map.get(key);}
+    public void put(String key, String value) { map.put(key, value);}
 
     public String getString(String key, String defaultValue) {
         String result = get(key);
