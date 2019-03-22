@@ -130,7 +130,6 @@ public class MonkeyLanguage extends BasicLanguage {
     }
 
     @Override public void showHelp() {
-        super.showHelp();
         System.out.println(
                 "Usage: monkeysync <command> [<arg>|<option>]*\n" +
                 "  -c, --config <file>  load a config file (multiple files are allowed, - can skip default configfile)\n" +
@@ -143,6 +142,7 @@ public class MonkeyLanguage extends BasicLanguage {
                 "  -r, --dry-run        do a dry(rehearsal) run without modifying anything\n" +
                 "  -w, --wet-run        do a wet(write) run that modifies the destination table\n" +
                 "  -a, --ask            if set will ask before each update\n" +
+                "  --once, --now        run the script immediately, and ignore a script.schedule\n" +
                 "  --<prop>=<value>     set/override any property from the loaded configuration\n" +
                 "  echo ....            echoes text to the console\n" +
                 "  run <file>           run a script from a file\n" +
@@ -155,5 +155,6 @@ public class MonkeyLanguage extends BasicLanguage {
                 "  syncDelete ...       sync only records that are marked as deleted in src\n" +
                 "  syncDeleteMissing ...sync only records that are missing in src\n" +
                 "  send <name>          send email with settings from <name>\n");
+        //super.showHelp();
     }
 }
