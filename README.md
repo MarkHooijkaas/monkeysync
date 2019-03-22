@@ -16,23 +16,29 @@ The maximum size of tables is thus limited by memory.
 
 ## Running 
 ```
-Usage: java -jar monkeysync-all-<version>.jar <command> [<arg>|<option>]*
-  -c, --config=<configFile>
-                       The config file.
-  -h, --help           Show this help message and exit.
-  -a, --ask            if set will ask before each update.
-  -v, --verbose        if set, will output details.
-  -q, --quiet          if set, no output will be generated
-  -V, --version        Print version information and exit.
+Usage: monkeysync <command> [<arg>|<option>]*
+  -c, --config <file>  load a config file (multiple files are allowed, - can skip default configfile)
+  -h, --help           show this help message and exit
+  -v, --verbose        if set, will output details
+  -d, --debug          if set, will output extra details
+  -q, --quiet          if set, no output will be printed
+  -V, --version        print version information and exit
+  -n, --no --null      clear a property set in the configuration
+  -r, --dry-run        do a dry(rehearsal) run without modifying anything
+  -w, --wet-run        do a wet(write) run that modifies the destination table
+  -a, --ask            if set will ask before each update
+  --<prop>=<value>     set/override any property from the loaded configuration
   echo ....            echoes text to the console
   run <file>           run a script from a file
-  load <name> <file>   load a table from <file> and name it <name>
-  save <name> <file>   save a table with <name> to <file> 
+  fetch <name>         fetch the data for a table with <name> from it's source (e.g. SQL or Mailchimp)
+  load <name> [<file>] load a named table from <file>, or the default file
+  save <name> [<file>] save a table with <name> to <file> or the default file
   sync <name1> <name2> sync table <name1> to table <name2>
   syncCreate ...       sync only new records
   syncUpdate ...       sync only existing records
   syncDelete ...       sync only records that are marked as deleted in src
   syncDeleteMissing ...sync only records that are missing in src
+  send <name>          send email with settings from <name>
 ```
 
 On the commandline you can specify one or more commands, separated by a comma.
@@ -141,3 +147,4 @@ For this one can use the regular jar task in gradle.
 - streaming (ordered) data source and destination, to handle larger than memory datasets
 - --limit flag to don't retrieve an entire dataset
 - ...
+
