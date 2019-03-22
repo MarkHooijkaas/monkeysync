@@ -57,14 +57,10 @@ public class Language {
             return null;
         logger.info("compiling {}", line);
         String[] parts = line.split("\\s+");
-        String cmdname=null;
-        for (int i = 0; i < parts.length; i++) {
-            if (cmdname==null && ! parts[i].startsWith("-"))
-                cmdname=parts[i];
-        }
+        String cmdname = findCommand(parts);
         Config cfg=new Config(parent,cmdname.trim());
         for (int i = 0; i < parts.length; i++) {
-            if (parseOption(cfg, parts, i))
+            if (cfg.parseOption(parts, i))
                 parts[i] = "";
         }
         Command cmd = commands.get(cmdname);
@@ -74,17 +70,16 @@ public class Language {
         return cmd.parse(cfg, parts);
     }
 
-    private boolean parseOption(Config cfg, String[] parts, int i) {
-        if (cfg.parseOption(parts,i))
-            return true;
-        String option=parts[i];
-        if ("-h".equals(option) || "--help".equals(option))
-            showHelp();
-        //else if ("-V".equals(option) || "--version".equals(option))
-        //    showVersion();
-        else
-            return false;
-        return true;
+    private String findCommand(String[] parts) {
+        for (int i = 0; i < parts.length; i++) {
+            if ("-h".equals(parts[i]) || "--help".equals(parts[i])) {
+                showHelp();
+                System.exit(0);
+            }
+            if (! parts[i].startsWith("-"))
+                return parts[i];
+        }
+        throw new UnsupportedOperationException("no command found");
     }
 
 

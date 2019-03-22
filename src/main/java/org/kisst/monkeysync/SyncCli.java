@@ -24,7 +24,7 @@ public class SyncCli {
             cfg.props.loadProps(Paths.get("config/monkeysync.props"));
 
         parseOptionsBeforeFirstCommand(cfg, args);
-        
+
         String str=String.join(" ", args).trim();
         if (str.length()==0)
             str=cfg.props.getString("script.cmd");
